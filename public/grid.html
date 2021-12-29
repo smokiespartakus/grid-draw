@@ -1,0 +1,852 @@
+<!doctype html>
+	<html>
+	<head>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+<style>
+	html, body {
+		font-family: 'Montserrat', sans-serif;
+		width: 100%;
+		height: 100%;
+		padding: 0;
+		margin: 0;
+	}
+	.btn {
+		padding: 6px 10px;
+		cursor: pointer;
+		background: #dff;
+		box-shadow: 1px 1px 3px rgba(0,0,0,.6);
+		border-radius: 4px;
+		box-sizing: border-box;
+		text-align: center;
+		display: inline-block;
+		transition: all .2s;
+		/*border: 2px solid #a5dbdb;*/
+	}
+	.btn:hover, btn:active {
+		background: #81e0dd;
+		/*border: 2px solid #69b5b5;*/
+	}
+	[v-cloak] {
+		display: none;
+	}
+	#menu {
+		position: fixed;
+		z-index: 10;
+		top: 0;
+		right: 0;
+		height: 100%;
+		width: 240px;
+		background: #5b9dce;
+		box-shadow: 0 0 20px #000;
+		box-sizing: border-box;
+		padding: 60px 10px 20px 10px;
+	}	
+	#menu-button {
+	    position: fixed;
+	    z-index: 11;
+	    padding: 8px 0px 6px 0px;
+	    width: 42px;
+	    text-align: center;
+	    border: 1px solid #346e99;
+	    font-size: 24px;
+		background: #fff;
+	    top: 6px;
+	    right: 8px;
+	    box-shadow: 0 0 8px rgb(0 0 0 / 40%);
+	    border-radius: 6px;
+	    cursor: pointer;
+	    color: #4786b6;
+	}
+	#menu hr {
+		margin: 10px;
+		border:  none;
+		border-top:  1px solid #3d759f;
+	}
+	#action-text {
+		width: 100%;
+		height: 100%;
+		position: fixed;
+		top: 0;
+		left: 0;
+		box-sizing: border-box;
+		padding: 100px 20px 20px 20px;
+		color: #ddd;
+		font-size: 4em;
+		font-weight: bold;
+		text-align: center;
+	}
+	#canvas {
+		width: 100%;
+		height: 100%;
+		position: fixed;
+		top: 0;
+		left: 0;
+	}
+	.grid-vertice {
+		stroke: #ccc;
+	}
+	.grid-vertice:hover {
+	}
+	.grid-point {
+		cursor: pointer;
+		stroke: transparent;
+		fill:  transparent;
+	}
+	.grid-point:hover {
+		stroke: blue;
+	}
+	.grid-point.active {
+		fill: blue;
+	}
+
+	.grid-tile {
+		cursor: pointer;
+		stroke: transparent;
+		fill:  transparent;		
+	}
+	.grid-tile:hover {
+		stroke-width: 0px;
+		fill: rgba(0,0,255, .2);
+	}
+	.grid-tile.active {
+		fill: blue;
+	}
+	.element {
+		cursor: pointer;
+	}
+	.element.active {
+		stroke: red;
+	}
+	.grid-line {
+		stroke-width: 4px;
+		stroke: #000;
+	}
+	.grid-text {
+		font-size: 20px;
+		font-weight: bold;
+		fill: #000;
+		stroke-width: 0;
+	}
+	.grid-text:hover {
+		fill: #00f;
+	}
+	.grid-text.active {
+		fill: #f00;
+	}
+	.character {
+		stroke-width: 4px;
+		cursor: pointer;
+	}
+	.character:hover {
+		stroke: #00f;
+	}
+	.character.active {
+		stroke: #f00;
+	}
+	.character-initials {
+		pointer-events: none;
+		font-weight: bold;
+	}
+	.fade-enter-active {
+		transition: opacity .3s;
+	}
+	.fade-enter,
+	.fade-leave-active {
+		transition: opacity .3s;
+		opacity: 0;
+	}
+	.draw-label {
+		display: block;
+	}
+	.small {
+		font-size: 80%;
+	}
+	.block {
+		display: block;
+	}
+	.form-group {
+		display: block;
+		padding-bottom: 0.2rem;
+	}
+	.menu-error {
+		color: #a00;
+		font-weight: bold;
+	}
+	.character-color {
+		width: 2rem;
+		height: 2rem;
+		display: inline-grid;
+		border-radius: 100%;
+		justify-items: center;
+		align-items: center;
+		font-weight: bold;
+		cursor: pointer;
+		margin:  0.1rem;
+		box-sizing: border-box;
+	}
+	.character-color.active {
+		box-shadow: 0 0 8px #fff, 0 0 8px #afd, 0 0 8px #fff inset;
+	}
+	input[type=text] {
+		padding: 4px 8px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		box-sizing: border-box;
+	}
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+	<div id="action-text"></div>
+	<div id="canvas">
+		<svg v-bind:viewBox="'0 0 ' + canvasW + ' ' + canvasH" v-bind:width="canvasW" v-bind:height="canvasH">
+			<!-- grid -->
+			<line class="grid-vertice" v-for="line in grid" v-bind:x1="line.x1" v-bind:x2="line.x2" v-bind:y1="line.y1" v-bind:y2="line.y2" />
+
+			<!-- grid tiles -->
+			<rect v-show="tilesActive" v-for="(tile, key) in tiles" class="grid-tile" v-bind:x="tile.x + tile.pad" v-bind:y="tile.y + tile.pad" v-bind:width="tile.r" v-bind:height="tile.r" v-on:click="tileClick(key)"/>
+			
+			<!-- drawn lines -->
+			<line  v-for="(line, key) in lines" v-bind:class="'grid-line element ' + (activeElement == line ? ' active' : '')" v-bind:x1="line.x1" v-bind:x2="line.x2" v-bind:y1="line.y1" v-bind:y2="line.y2" v-on:click="lineClick(key)" />
+
+			<!-- texts -->
+			<text v-for="(text, key) in texts" v-bind:class="'grid-text element ' + (activeElement == text ? ' active' : '')" v-bind:x="text.x" v-bind:y="text.y + textFontSize / 2" v-on:click="textClick" data-type="text" v-bind:data-key="key" v-bind:style="'font-size: ' + textFontSize + 'px;'" dominant-baseline="middle">{{ text.text }}</text>
+			
+			<!-- grid points -->
+			<rect v-show="pointsActive" v-for="(point, key) in points" v-bind:class="'grid-point' + (activePoint == point ? ' active' : '')" v-bind:x="point.x - point.r" v-bind:y="point.y - point.r" v-bind:width="point.r*2" v-bind:height="point.r*2" v-on:click="pointClick(key)"/>
+
+			<!-- characters -->
+			<circle v-for="(char, key) in characters" v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:cx="char.tile.x + gridSize/2" v-bind:cy="char.tile.y + gridSize/2" v-bind:r="characterRadius" v-bind:style="'font-size: ' + characterFontSize + 'px;'" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)">
+			</circle>
+			<text class="character-initials" v-for="(char, key) in characters" v-bind:x="char.tile.x + gridSize/2" v-bind:y="char.tile.y + gridSize/2" text-anchor="middle" dominant-baseline="middle">{{ char.initials }}</text>
+
+
+			
+		</svg>
+	</div>
+	<transition name="fade">
+		<div id="menu" v-cloak v-if="menuShow">
+			<div class="btn">Add Character</div>
+			<div>Draw:</div>
+			<label for="draw-lines-btn" class="draw-label"><input type="checkbox" id="draw-lines-btn" v-model="draw.lines" v-on:change="drawBtnClick('lines')"/>Lines</label>
+			
+			<hr />
+			
+			<label for="draw-character-btn" class="draw-label"><input type="checkbox" id="draw-character-btn" v-model="draw.character" v-on:change="drawBtnClick('character')"/>Character</label>
+			<div class="form-group" v-if="draw.character" >
+			<label for="" class="small block">Name:</label>
+			<input type="text" v-model="drawCharacterName" placeholder="Legolas" v-on:keyup="characterNameKeyUp"/>
+			</div>
+			<div class="form-group" v-if="draw.character" >
+			<label for="" class="small block">Initials:</label>
+			<input type="text" v-model="drawCharacterInitials" placeholder="LE" maxlength="2" />
+			<div class="menu-error" v-if="drawCharacterError">{{ drawCharacterError }}</div>
+			</div>
+			<div v-if="draw.character" class="draw-label">
+				<div v-for="color in characterColors" v-bind:class="'character-color' + (color == drawCharacterColor ? ' active' : '')" v-bind:style="'border: 3px solid ' + color.stroke + '; background: ' + color.fill + ';'" v-on:click="drawCharacterColor = color">{{ drawCharacterInitials }}</div>
+			</div>
+			<div class="small" v-if="draw.character">Click on a tile to place character</div>
+			
+			<hr />
+			
+			<label for="draw-text-btn"><input type="checkbox" id="draw-text-btn" v-model="draw.text" v-on:change="drawBtnClick('text')"/>Text</label>
+			<input type="text" v-if="draw.text" v-model="drawTextValue" placeholder="This is a chair"/>
+			<div class="small" v-if="draw.text">Click on the grid to place text</div>
+			<div class="menu-error" v-if="drawTextError">{{ drawTextError }}</div>
+
+			<!-- <label for="draw-boxes-btn"><input type="checkbox" id="draw-boxes-btn" v-model="draw.boxes" v-on:change="drawBtnClick('boxes')"/>Boxes</label> -->
+			<!-- <label for="draw-circles-btn"><input type="checkbox" id="draw-circles-btn" v-model="draw.circles" v-on:change="drawBtnClick('circles')"/>Circles</label> -->
+		</div>
+	</transition>
+	<div id="menu-button" v-on:click="menuShow=!menuShow">
+	<transition name="fade">
+		<i class="fas fa-times" v-if="menuShow"></i>
+		<i class="fas fa-bars" v-else></i>
+	</transition>
+	</div>
+</div><!-- app 0-->
+<script>
+
+	new Vue({
+		el: '#app',
+		data: {
+			pointsActive: false,
+			tilesActive: false,
+			activePoint: null,
+			activeElement: null,
+			drawType: null,
+			draw: {
+				lines: false,
+				boxes: false,
+				circles: false,
+				character: false,
+			},
+			drawTextValue: '',
+			drawTextError: '',
+			drawCharacterName: '',
+			drawCharacterInitials: '',
+			drawCharacterColor: null,
+			drawCharacterError: null,
+			characterColors: [
+				{fill: '#ff9', stroke: '#bb5'},
+				{fill: 'rgb(255 209 153)', stroke: 'rgb(187 155 85)'},
+				{fill: 'rgb(255 162 153)', stroke: 'rgb(187 108 85)'},
+				{fill: '#ff99ca', stroke: '#bb5485'},
+				{fill: '#c099ff', stroke: '#7b54bb'},
+				{fill: '#99afff', stroke: '#546abb'}, //227
+				{fill: '#99d1ff', stroke: 'hsl(207 43% 53% / 1)'}, // 207
+				{fill: '#99f3ff', stroke: 'hsl(187 43% 53% / 1)'},// 187
+				{fill: '#99ffc7', stroke: 'hsl(147 43% 53% / 1)'}, // 147
+				// {fill: '#ff9', stroke: '#bb5'},
+			],
+			characterFontSize: 24,
+			characterRadius: 21,
+			menuShow: false,
+			canvas: null,
+			canvasW: 0,
+			canvasH: 0,
+			gridSize: 50,
+			paddingOuter: 0.5,
+			textFontSize: 20,
+			history: [],
+			characters: [],
+			lines: [],
+			rects: [],
+			grid: [],
+			tiles: [],
+			points: [],
+			boxes: [],
+			circles: [],
+			texts: [{x: 40, y: 40, text: 'Fissi', t: 'text'}],
+		},
+		methods: {
+			pointClick(index) {
+				const point = this.points[index];
+				if (!point) {
+					console.warn('point not found', index);
+					return;
+				}
+				this.activeElement = null;
+				let nothingHappened = true;
+				switch(this.drawType) {
+					case 'lines':
+					if (this.activePoint && this.activePoint != point) {
+						this.addLine(this.activePoint, point);
+						this.activePoint = point;
+						nothingHappened = false;
+					}
+					break;
+					case 'text':
+						if (!this.drawTextValue) {
+							this.menuError = 'Text required before placing.';
+							return;
+						}
+						this.addElement(this.texts, {t:'text', x: point.x, y: point.y, text: this.drawTextValue});
+						nothingHappened = false;
+					break;
+					case 'character':
+						if (!this.drawCharacterName || !this.drawCharacterInitials) {
+							this.menuError = 'Name and initials required before placing.';
+							return null;
+						}
+						this.addElement(this.characters, {t:'character', x: point.x, y: point.y, initials: this.drawCharacterInitials, name: this.drawCharacterName});
+						nothingHappened = false;
+					break;
+				}
+				if (nothingHappened) {
+					if (this.activePoint) {
+						this.activePoint = null;
+					} else {
+						this.activePoint = point;
+					}
+				}
+
+			},
+			tileClick(index) {
+				const tile = this.tiles[index];
+				if (!tile) {
+					console.warn('tile not found', index);
+					return;
+				}
+				if (this.draw.character) {
+					if (!this.drawCharacterName || !this.drawCharacterInitials || !this.drawCharacterColor) {
+						this.drawCharacterError = 'Name, initials and Colour required.';
+						return;
+					}
+					this.addElement(this.characters, {
+						t: 'character',
+						color: this.drawCharacterColor,
+						name: this.drawCharacterName,
+						initials: this.drawCharacterInitials,
+						tile: tile,
+					});
+					this.drawCharacterColor = null;
+					this.drawCharacterName = null;
+					this.drawCharacterInitials = null;
+				}
+				else if (this.activeElement && this.activeElement.t == 'character') {
+					console.log('fissi!')
+					this.activeElement.tile = tile;
+				}
+
+			},
+			textClick(event) {
+				const index = parseInt(event.target.getAttribute('data-key'));
+				this.activePoint = null;
+				if (this.activeElement != this.texts[index])
+					this.activeElement = this.texts[index];
+				else 
+					this.activeElement = null;
+				// console.log(event, event.target.getAttribute('data-type'), event.target.getAttribute('data-key'));
+			},
+			lineClick(index) {
+				const line = this.lines[index];
+				if (!line) {
+					console.warn('line not found', index);
+					return;
+				}
+				this.activePoint = null;
+				// if (this.activePoint && this.activePoint != point) {
+					// this.addLine(this.activePoint, point);
+				// }
+				if (this.activeElement != line)
+					this.activeElement = line;
+				else 
+					this.activeElement = null;
+			},
+			characterClick(index) {
+				const char = this.characters[index];
+				if (!char) {
+					console.warn('charater not found', index);
+					return;
+				}
+				this.drawBtnClick('unset');
+				if (this.activeElement == char) {
+					this.activeElement = null;
+					this.tilesActive = false;
+				} else {
+					this.activeElement = char;
+					this.tilesActive = true;
+				}
+			},
+			elementClick(event) {
+				// Could be used, but feels like there are separate options by element type
+				const index = parseInt(event.target.getAttribute('data-key'));
+				const type = event.target.getAttribute('data-type');
+				let elements;
+				switch (type) {
+					case 'text': elements = this.texts; break;
+					case 'line': elements = this.lines; break;
+					case 'character': elements = this.characters; break;
+				}
+				if (!elements) {
+					console.warn('elements not found', type);
+					return;
+				}
+				const element = elements[index];
+				if (!element) {
+					console.warn('element not found', type, index);
+				}
+				this.activePoint = null;
+				if (this.activeElement != element)
+					this.activeElement = element;
+				else 
+					this.activeElement = null;	
+			},
+			drawBtnClick(type) {
+				for (let key of Object.keys(this.draw)) {
+					if (key !== type) this.$set(this.draw, key, false);
+				}
+				this.tilesActive = false;
+				this.pointsActive = false;
+				if (this.draw[type]) {
+					this.drawType = type;
+					switch (type) {
+						case 'lines':
+						case 'boxes':
+						case 'circles':
+						case 'text':
+						this.pointsActive = true;
+						break;
+						case 'character':
+						this.tilesActive = true;
+						break;
+					}
+				} else {
+					this.drawType = null;
+				}
+			},
+			addLine(p1, p2) {
+				this.addElement(this.lines, {t:'line', x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y});
+			},
+			characterNameKeyUp() {
+				if (this.drawCharacterName) {
+					this.drawCharacterInitials = this.drawCharacterName.substr(0,2).toUpperCase();
+				}
+			},
+			addElement(list, elem) {
+				list.push(elem);
+				this.historyAdd(elem);
+			},
+			createGrid() {
+				const canvas = this.canvas;
+				const h = canvas.offsetHeight;
+				const w = canvas.offsetWidth;
+				const padding = this.paddingOuter;
+				const gridSize = this.gridSize;
+				const grid = [];
+				let hh = padding * gridSize;
+				while (hh < h) {
+					grid.push({t: 'grid', x1: 0, x2: w, y1: hh, y2: hh})
+					hh+=gridSize;
+				}
+				let ww = padding * gridSize;
+				while (ww < w) {
+					grid.push({t: 'grid', x1: ww, x2: ww, y1: 0, y2: h})
+					ww+=gridSize;
+				}
+				this.$set(this, 'grid', grid);
+			},
+			createGridPoints() {
+				const canvas = this.canvas;
+				const h = canvas.offsetHeight;
+				const w = canvas.offsetWidth;
+				const padding = this.paddingOuter;
+				const gridSize = this.gridSize;
+				const pointRadius = 5;
+				const pointsPerTile = 4;
+				const points = [];
+				let hh = padding * gridSize;
+				while (hh < h) {
+					let ww = padding * gridSize;
+					while (ww < w) {
+						points.push({t: 'point', x: ww, y: hh, r: pointRadius})
+					ww+=gridSize / pointsPerTile;
+					}
+					hh+=gridSize / pointsPerTile;
+				}
+				this.$set(this, 'points', points);
+				// this.points = points;
+			},
+			createGridTiles() {
+				const canvas = this.canvas;
+				const h = canvas.offsetHeight;
+				const w = canvas.offsetWidth;
+				const padding = this.paddingOuter;
+				const tilePadding = 5;
+				const gridSize = this.gridSize;
+				const tiles = [];
+				let hh = padding * gridSize;
+				const tileSize = gridSize - 2 * tilePadding;
+				while (hh < h) {
+					let ww = padding * gridSize;
+					while (ww < w) {
+						tiles.push({t: 'tile', x: ww, y: hh, r: tileSize, pad: tilePadding})
+					ww+=gridSize;
+					}
+					hh+=gridSize;
+				}
+				this.$set(this, 'tiles', tiles);
+			},
+			historyAdd(elem) {
+				this.history.push({action: 'add', elem: elem});
+			},
+			historyDelete(elem) {
+				this.history.push({action: 'delete', elem: elem});
+			},
+			historyPop() {
+				const action = this.history.pop();
+				if (!action) return;
+				const list = this.getElementArray(action.elem);
+				if (!list) return;
+				this.activeElement = null;
+				this.activePoint = null;
+				switch (action.action) {
+					case 'add':
+					this.removeElement(list, action.elem);
+					break;
+					case 'delete':
+						list.push(action.elem);						
+					break;
+				}
+			},
+			getElementArray(elem) {
+				if (!elem) return null;
+				switch(elem.t) {
+					case 'line': return this.lines;
+					case 'text': return this.texts;
+					case 'character': return this.characters;
+					case 'circle': return this.circles;
+					case 'box': return this.boxes;
+				}
+				return null;
+			},
+			removeElement(list, elem) {
+				list.splice(0, list.length, ...list.filter(e => e != elem));
+			}
+		},
+		mounted() {
+			this.canvas = document.getElementById('canvas');
+			this.canvasH = canvas.offsetHeight;
+			this.canvasW = canvas.offsetWidth;
+			this.createGrid();
+			this.createGridPoints();
+			this.createGridTiles();
+			this.addElement(this.characters, {
+				t: 'character',
+				name: 'Jonas',
+				initials: 'JO',
+				tile: this.tiles[10],
+				color: this.characterColors[1],
+			});
+			this.addElement(this.characters, {
+				t: 'character',
+				name: 'Jonas',
+				initials: 'JO',
+				tile: this.tiles[28],
+				color: this.characterColors[7],
+			});
+			this.addElement(this.characters, {
+				t: 'character',
+				name: 'Jonas',
+				initials: 'JO',
+				tile: this.tiles[173],
+				color: this.characterColors[3],
+			});
+			document.addEventListener('keyup', (event) => {
+				switch(event.keyCode) {
+					case 46: // delete
+					if (this.activeElement) {
+						switch (this.activeElement.t) {
+							case 'line':
+							this.removeElement(this.lines, this.activeElement);
+							break;
+							case 'text':
+							this.removeElement(this.texts, this.activeElement);
+							break;
+							case 'character':
+							this.removeElement(this.characters, this.activeElement);
+							break;
+						}
+						this.historyDelete(this.activeElement);
+						this.activeElement = null;
+					}
+					case 27: // escape
+						if (this.activeElement) {
+							this.tilesActive = false;
+							this.pointsActive = false;
+						}
+						this.activeElement = null;
+						this.activePoint = null;
+					break;
+					case 90: //z
+					if (event.ctrlKey) this.historyPop();
+					break;
+				}
+				console.log(event.keyCode, event);
+			});
+		},
+	});
+	
+
+
+/*
+
+ * OLD!! <<<<<
+ 
+ */
+
+		(function() {
+		return;
+		class History {
+			constructor() {
+
+			}
+			history = [];
+			add(elem) {
+				this.history.push({action: 'add', elem: elem});
+			}
+			delete(elem) {
+				this.history.push({action: 'delete', elem: elem});
+			}
+			pop() {
+				const action = this.history.pop();
+				if (!action) return;
+				clearActive();
+				switch(action.action) {
+					case 'add':
+						action.elem.remove();
+					break;
+					case 'delete':
+						svg.appendChild(action.elem);
+					break;
+				}
+			}
+		}
+		init();
+		let selected;
+		let firstPoint;
+		const padding = 0.5;
+		const gridSize = 50;
+		const canvas = document.getElementById('canvas');
+		const h = canvas.offsetHeight;
+		const w = canvas.offsetWidth;
+		const pointRadius = 5;
+		let hh = padding * gridSize;
+		let ww = padding * gridSize;
+		let svg, vert, point;
+		const activePoints = [];		
+		svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+		const history = new History(svg);
+		svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+		// svg.setAttribute('viewBox', `0 0 100 100`);
+		// svg.setAttribute('style', `width:${w}px; height: ${h}px; display: block;`);
+		// svg.setAttribute('xmlns', "http://www.w3.org/2000/svg")
+		canvas.appendChild(svg);
+		while (hh < h) {
+			vert = document.createElementNS("http://www.w3.org/2000/svg", "line");
+			svg.appendChild(vert);
+			vert.setAttribute('class', 'grid-vertice');
+			// vert.setAttribute('stroke', '#ccc');
+			vert.setAttribute('x1', 0);
+			vert.setAttribute('y1', hh);
+			vert.setAttribute('x2', w);
+			vert.setAttribute('y2', hh);
+			hh+=gridSize;
+		}
+
+		while (ww < w) {
+			vert = document.createElementNS("http://www.w3.org/2000/svg", "line");
+			svg.appendChild(vert);
+			vert.setAttribute('class', 'grid-vertice');
+			vert.setAttribute('y1', 0);
+			vert.setAttribute('x1', ww);
+			vert.setAttribute('y2', h);
+			vert.setAttribute('x2', ww);
+			ww+=gridSize;
+		}
+		hh = padding * gridSize;
+		while (hh < h) {
+			ww = padding * gridSize;
+			while (ww < w) {
+				point = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+				svg.appendChild(point);
+				point.setAttribute('class', 'grid-point');
+				point.setAttribute('width', pointRadius * 2);
+				point.setAttribute('height', pointRadius * 2);
+				point.setAttribute('y', hh - pointRadius);
+				point.setAttribute('x', ww - pointRadius);
+				point.setAttribute('data-x', ww);
+				point.setAttribute('data-y', hh);
+				point.addEventListener('click', (event) => {
+					const activePoint = document.querySelector('.grid-point.active');
+					// event.target.classList.toggle("active");
+					if (event.target.classList.contains("active")) {
+						event.target.classList.remove("active");
+					} else {
+						clearActive();
+						event.target.classList.add("active");
+						const pp = createPoint(event.target);
+						if (activePoint) {
+							addElement(drawLine(createPoint(activePoint), pp));
+							
+						}
+						activePoints.push(pp);
+					}
+				});
+				if (Math.random() * 20 < 1) addElement(createCharacter(createPoint(point)));
+				ww+=gridSize;
+			}
+			hh+=gridSize;
+		}
+		function drawLine(p1, p2) {
+			const x1 = p1.x;
+			const x2 = p2.x;
+			const y1 = p1.y;
+			const y2 = p2.y;
+
+			const vert = document.createElementNS("http://www.w3.org/2000/svg", "line");
+			vert.setAttribute('class', 'grid-line element');
+			vert.setAttribute('stroke-width', 4);
+			vert.setAttribute('stroke', '#000');
+			vert.setAttribute('x1', x1);
+			vert.setAttribute('y1', y1);
+			vert.setAttribute('x2', x2);
+			vert.setAttribute('y2', y2);
+			vert.addEventListener('click', (event) => {
+				if (!event.target.classList.contains('active')) {
+					clearActive();
+					selected = event.target;
+				} else {
+					selected = null;
+				}
+				event.target.classList.toggle('active');
+
+			});
+			return vert;
+		}
+
+		function createCharacter(square, color) {
+			const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+			circle.setAttribute('class', 'character element');
+			circle.setAttribute('cx', square.x - gridSize/2);
+			circle.setAttribute('cy', square.y - gridSize/2);
+			circle.setAttribute('r', gridSize/2 - 5);
+			circle.setAttribute('stroke-width', 6);
+			circle.setAttribute('stroke', '#090');
+			circle.setAttribute('fill', '#0f0');
+			return circle;
+		}
+		
+		function createPoint(target) {
+			return {x: target.getAttribute('data-x'), y: target.getAttribute('data-y')};
+		}
+		
+		function clearActive() {
+			for (let a of document.querySelectorAll('.active')) {
+				a.classList.remove('active');
+			}
+		}
+		
+		function addElement(elem) {
+			if (!firstPoint) firstPoint = svg.querySelector('.grid-point');
+			svg.insertBefore(elem, firstPoint);
+			history.add(elem);
+		}
+		function init() {
+			document.getElementById('menu-button').addEventListener('click', (event) => {
+				document.getElementById('menu-button').classList.toggle('open');
+				document.getElementById('menu').classList.toggle('open');
+			});
+		}
+		function setActionText(text) {
+			document.getElementById('action-text').innerHTML = text || '';
+		}
+		document.addEventListener('keyup', (event) => {
+			switch(event.keyCode) {
+				case 46: // delete
+				if (selected) { 
+					selected.classList.remove('active');
+					selected.remove();
+					history.delete(selected);
+					selected = null;
+				}
+				case 27: // escape
+				clearActive();
+				break;
+				case 90: //z
+				if (event.ctrlKey) history.pop();
+				break;
+			}
+			console.log(event.keyCode, event);
+		});
+
+		
+	})();
+</script>
+</body>
+</html>

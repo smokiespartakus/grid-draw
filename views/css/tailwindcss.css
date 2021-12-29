@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+@layer components {
+    .btn, button.btn {
+        @apply font-bold py-2 px-4 rounded cursor-pointer text-center inline-block focus:outline-none focus:ring focus:ring-blue-300;
+    }
+    .btn-blue, button.btn-blue {
+        @apply bg-blue-500 hover:bg-blue-700 text-white focus:ring-blue-300 btn;
+    }
+    .btn-red, button.btn-red {
+        @apply bg-red-500 hover:bg-red-700 text-white focus:ring-red-300 btn;
+    }
+    .btn-orange, button.btn-orange {
+        @apply bg-orange-500 hover:bg-orange-700 text-white focus:ring-orange-300 btn;
+    }
+}

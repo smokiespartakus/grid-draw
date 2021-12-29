@@ -1,0 +1,114 @@
+<% extend('../layouts/base_layout') %>
+
+<div id="app" v-cloak>
+    <transition name="fade">
+        <div id="toast-text" class="toast" v-if="toastText">{{ toastText }}</div>
+    </transition>
+    <transition name="fade">
+        <div id="toast-error" class="toast text-red-400 z-10" v-if="toastError">{{ toastError }}</div>
+    </transition>
+    <div id="canvas">
+        <svg v-bind:viewBox="'0 0 ' + canvasW + ' ' + canvasH" v-bind:width="canvasW" v-bind:height="canvasH">
+            <!-- grid -->
+            <line class="grid-vertice" v-for="line in grid" v-bind:x1="line.x1" v-bind:x2="line.x2" v-bind:y1="line.y1" v-bind:y2="line.y2" />
+
+            <!-- grid tiles -->
+            <rect v-show="tilesActive" v-for="(tile, key) in tiles" class="grid-tile" v-bind:x="tile.x + tile.pad" v-bind:y="tile.y + tile.pad" v-bind:width="tile.r" v-bind:height="tile.r" v-on:click="tileClick(key)"/>
+
+            <!-- drawn lines -->
+            <line  v-for="(line, key) in lines" v-bind:class="'grid-line element ' + (activeElement == line ? ' active' : '')" v-bind:x1="line.x1" v-bind:x2="line.x2" v-bind:y1="line.y1" v-bind:y2="line.y2" v-on:click="lineClick(key)" />
+
+            <!-- texts -->
+            <text v-for="(text, key) in texts" v-bind:class="'grid-text element ' + (activeElement == text ? ' active' : '')" v-bind:x="text.x" v-bind:y="text.y + textFontSize / 2" v-on:click="textClick" data-type="text" v-bind:data-key="key" v-bind:style="'font-size: ' + textFontSize + 'px;'" dominant-baseline="middle">{{ text.text }}</text>
+
+            <!-- grid points -->
+            <rect v-show="pointsActive" v-for="(point, key) in points" v-bind:class="'grid-point' + (activePoint == point ? ' active' : '')" v-bind:x="point.x - point.r" v-bind:y="point.y - point.r" v-bind:width="point.r*2" v-bind:height="point.r*2" v-on:click="pointClick(key)"/>
+
+            <!-- characters -->
+            <circle v-for="(char, key) in characters" v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:tooltip="char.name" v-bind:cx="char.tile.x + gridSize/2" v-bind:cy="char.tile.y + gridSize/2" v-bind:r="characterRadius" v-bind:style="'font-size: ' + characterFontSize + 'px;'" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)" v-on:mouseout="characterMouseOut" v-on:mouseover="characterMouseOver" ></circle>
+            <text class="character-initials" v-for="(char, key) in characters" v-bind:x="char.tile.x + gridSize/2" v-bind:y="char.tile.y + gridSize/2" text-anchor="middle" dominant-baseline="middle">{{ char.initials }}</text>
+        </svg>
+    </div><!-- canvas -->
+
+    <!-- Menu -->
+    <transition name="fade">
+        <div id="menu" v-cloak v-if="menuShow" class="text-white rounded-bl-md px-2 py-6 fixed z-5 top-0 right-0 bg-blue-400 w-64 drop-shadow">
+            <div class="bold">{{name}} / {{ gameId }}</div>
+            <div>Draw:</div>
+            <label for="draw-lines-btn" class="draw-label"><input type="checkbox" id="draw-lines-btn" v-model="draw.lines" v-on:change="drawBtnClick('lines')"/>Lines</label>
+
+            <hr />
+
+            <label for="draw-character-btn" class="draw-label"><input type="checkbox" id="draw-character-btn" v-model="draw.character" v-on:change="drawBtnClick('character')"/>Character</label>
+            <div class="form-group" v-if="draw.character" >
+                <label for="" class="small block">Name:</label>
+                <input autofocus type="text" v-model="drawCharacterName" class="text-gray-800" placeholder="Legolas" v-on:keyup="characterNameKeyUp"/>
+            </div>
+            <div class="form-group" v-if="draw.character" >
+                <label for="" class="small block">Initials:</label>
+                <input type="text" v-model="drawCharacterInitials" class="text-gray-800" placeholder="LE" maxlength="2" />
+                <div class="menu-error" v-if="drawCharacterError">{{ drawCharacterError }}</div>
+            </div>
+            <div v-if="draw.character" class="draw-label">
+                <div v-for="color in characterColors" v-bind:class="'character-color text-gray-800' + (color == drawCharacterColor ? ' active' : '')" v-bind:style="'border: 3px solid ' + color.stroke + '; background: ' + color.fill + ';'" v-on:click="drawCharacterColor = color">{{ drawCharacterInitials }}</div>
+            </div>
+            <div class="small" v-if="draw.character">Click on a tile to place character</div>
+
+            <hr />
+
+            <label for="draw-text-btn"><input type="checkbox" id="draw-text-btn" v-model="draw.text" v-on:change="drawBtnClick('text')"/>Text</label>
+            <input autofocus type="text" v-if="draw.text" class="text-gray-800" v-model="drawTextValue" placeholder="This is a chair"/>
+            <div class="small" v-if="draw.text">Click on the grid to place text</div>
+            <div class="menu-error" v-if="drawTextError">{{ drawTextError }}</div>
+            <hr />
+            <div class="form-group"><div class="btn-orange" v-on:click="clearElements">Clear Elements</div></div>
+            <div class="form-group"><div class="btn-red" v-on:click="clearCharacters">Clear Characters</div></div>
+
+            <!-- <label for="draw-boxes-btn"><input type="checkbox" id="draw-boxes-btn" v-model="draw.boxes" v-on:change="drawBtnClick('boxes')"/>Boxes</label> -->
+            <!-- <label for="draw-circles-btn"><input type="checkbox" id="draw-circles-btn" v-model="draw.circles" v-on:change="drawBtnClick('circles')"/>Circles</label> -->
+        </div>
+    </transition>
+    <div id="menu-button" v-if="enabled" v-on:click="menuShow=!menuShow" class="btn-blue px-0 w-10 fixed top-1 right-1 z-10">
+        <transition name="fade">
+            <i class="fas fa-times" v-if="menuShow"></i>
+            <i class="fas fa-bars" v-else></i>
+        </transition>
+    </div>
+
+    <transition name="fade">
+    <div id="tooltip" v-if="tooltipTarget" class="z-5 px-2 py-0.5 rounded bg-black text-white inline-block fixed" v-bind:style="'left: '+tooltipLeft + 'px; top: '+ tooltipTop + 'px'">{{ tooltipTarget.getAttribute('tooltip') }}</div>
+    </transition>
+        <!-- name modal -->
+    <transition name="fade">
+    <div v-if="modalNameShow" class="fixed z-50 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+            <!-- This element is to trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                <form v-on:submit.prevent="setName">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <label class="block text-gray-700 text-lg mb-2" for="name">
+                                Enter your name
+                            </label>
+                            <input autofocus id="name" v-model="name" name="name" type="text" placeholder="Legolas" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <input type="submit" value="Go!" class="btn-blue bg-blue-500 w-full" />
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </transition>
+</div><!-- app 0-->
+<script type="text/javascript">
+const gameId = '<%= gameId %>';
+const data = <%= JSON.stringify(data) %>;
+</script>
+<script type="text/javascript" src="/js/app_game.js?v=<%= process.env.APP_VERSION %>"></script>

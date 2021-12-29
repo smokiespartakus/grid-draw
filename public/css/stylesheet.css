@@ -1,0 +1,167 @@
+html, body {
+    font-family: 'Montserrat', sans-serif;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+.btn {
+    padding: 6px 10px;
+    cursor: pointer;
+    background: #dff;
+    box-shadow: 1px 1px 3px rgba(0,0,0,.6);
+    border-radius: 4px;
+    box-sizing: border-box;
+    text-align: center;
+    display: inline-block;
+    transition: all .2s;
+    /*border: 2px solid #a5dbdb;*/
+}
+.btn:hover, btn:active {
+    background: #81e0dd;
+    /*border: 2px solid #69b5b5;*/
+}
+[v-cloak] {
+    display: none;
+}
+#menu {
+    box-shadow: 0 0 20px rgba(0,0,0,.4);
+}
+#menu-button {
+}
+#menu hr {
+    margin: 10px;
+    border:  none;
+    border-top:  1px solid #3d759f;
+}
+.toast {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    padding: 100px 20px 20px 20px;
+    color: #ddd;
+    font-size: 4em;
+    font-weight: bold;
+    text-align: center;
+}
+#canvas {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+.grid-vertice {
+    stroke: #ccc;
+}
+.grid-vertice:hover {
+}
+.grid-point {
+    cursor: pointer;
+    stroke: transparent;
+    fill:  transparent;
+}
+.grid-point:hover {
+    stroke: blue;
+}
+.grid-point.active {
+    fill: blue;
+}
+
+.grid-tile {
+    cursor: pointer;
+    stroke: transparent;
+    fill:  transparent;
+}
+.grid-tile:hover {
+    stroke-width: 0px;
+    fill: rgba(0,0,255, .2);
+}
+.grid-tile.active {
+    fill: blue;
+}
+.element {
+    cursor: pointer;
+}
+.element.active {
+    stroke: red;
+}
+.grid-line {
+    stroke-width: 4px;
+    stroke: #000;
+}
+.grid-text {
+    font-size: 20px;
+    font-weight: bold;
+    fill: #000;
+    stroke-width: 0;
+}
+.grid-text:hover {
+    fill: #00f;
+}
+.grid-text.active {
+    fill: #f00;
+}
+.character {
+    stroke-width: 4px;
+    cursor: pointer;
+}
+.character:hover {
+    stroke: #00f;
+}
+.character.active {
+    stroke: #f00;
+}
+.character-initials {
+    pointer-events: none;
+    font-weight: bold;
+}
+.fade-enter-active {
+    transition: opacity .3s;
+}
+.fade-enter,
+.fade-leave-active {
+    transition: opacity .3s;
+    opacity: 0;
+}
+.draw-label {
+    display: block;
+}
+.small {
+    font-size: 80%;
+}
+.block {
+    display: block;
+}
+.form-group {
+    display: block;
+    padding-bottom: 0.2rem;
+}
+.menu-error {
+    color: #a00;
+    font-weight: bold;
+}
+.character-color {
+    width: 2rem;
+    height: 2rem;
+    display: inline-grid;
+    border-radius: 100%;
+    justify-items: center;
+    align-items: center;
+    font-weight: bold;
+    cursor: pointer;
+    margin:  0.1rem;
+    box-sizing: border-box;
+}
+.character-color.active {
+    box-shadow: 0 0 8px #fff, 0 0 8px #afd, 0 0 8px #fff inset;
+}
+input[type=text] {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}

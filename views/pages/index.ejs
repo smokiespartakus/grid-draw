@@ -1,0 +1,30 @@
+<% extend('../layouts/base_layout') %>
+<div id="app" class="bg-gray-200 flex justify-center items-center h-full w-full">
+    <div class="w-full max-w-xs">
+    <form v-on:submit.prevent="join" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <!--<div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                Your Name
+            </label>
+            <input id="name" name="name" type="text" placeholder="Legolas" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>-->
+        <div class="mb-4">
+            <button autofocus v-on:click="create" class="btn-blue" type="button">
+                Create Game
+            </button>
+        </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="gameid">
+                ...or Join Game width ID
+            </label>
+            <input id="gameid" v-model="gameId" name="gameid" type="text" placeholder="abc123" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div class="">
+            <button v-on:click="join" class="btn-blue" type="button">
+                Join Game
+            </button>
+        </div>
+    </form>
+    </div>
+</div>
+<script type="text/javascript" src="/js/app_index.js?v=<%= process.env.APP_VERSION %>"></script>
