@@ -230,10 +230,6 @@ const vueApp = new Vue({
 				this.drawCharacterInitials = this.drawCharacterName.substr(0,2).toUpperCase();
 			}
 		},
-		addElement(list, elem) {
-			list.push(elem);
-			this.historyAdd(elem);
-		},
 		setName() {
 			if (this.name) {
 				Websocket.send({cmd: 'set-name', name: this.name});
@@ -332,8 +328,14 @@ const vueApp = new Vue({
 			}
 			return null;
 		},
+		addElement(list, elem) {
+			list.push(elem);
+			this.historyAdd(elem);
+			Websocket.send({cmd: 'add', elem: elem});
+		},
 		removeElement(list, elem) {
 			list.splice(0, list.length, ...list.filter(e => e != elem));
+			Websocket.send({cmd: 'remove', elem: elem});
 		},
 		clearElements() {
 			// @todo history
@@ -397,7 +399,7 @@ const vueApp = new Vue({
 			}
 
 		},
-		characterMouseOver(event) {
+		tooltipMouseOver(event) {
 			// this.tooltip = name;
 			if (this.tooltipTarget) return;
 			const rect = event.target.getBoundingClientRect();
@@ -411,7 +413,7 @@ const vueApp = new Vue({
 			});
 			// console.log('IN', event.clientX, event.clientY, event.target.getBoundingClientRect(), event.target);
 		},
-		characterMouseOut(event) {
+		tooltipMouseOut(event) {
 			this.tooltipTarget = null;
 			// console.log('Out', event.clientX, event.clientY, event.target);
 		},

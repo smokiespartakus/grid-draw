@@ -63,6 +63,12 @@ class WsCommand {
 						this.user = data.name;
 						this.result = {success: this.cmd, name: data.name};
 						break;
+					case 'add':
+						this.result = {success: this.cmd};
+						break;
+					case 'remove':
+						this.result = {success: this.cmd};
+						break;
 					default:
 						this.setError('command not found');
 				}

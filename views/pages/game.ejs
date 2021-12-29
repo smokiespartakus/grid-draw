@@ -25,7 +25,7 @@
             <rect v-show="pointsActive" v-for="(point, key) in points" v-bind:class="'grid-point' + (activePoint == point ? ' active' : '')" v-bind:x="point.x - point.r" v-bind:y="point.y - point.r" v-bind:width="point.r*2" v-bind:height="point.r*2" v-on:click="pointClick(key)"/>
 
             <!-- characters -->
-            <circle v-for="(char, key) in characters" v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:tooltip="char.name" v-bind:cx="char.tile.x + gridSize/2" v-bind:cy="char.tile.y + gridSize/2" v-bind:r="characterRadius" v-bind:style="'font-size: ' + characterFontSize + 'px;'" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)" v-on:mouseout="characterMouseOut" v-on:mouseover="characterMouseOver" ></circle>
+            <circle v-for="(char, key) in characters" v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:tooltip="char.name" v-bind:cx="char.tile.x + gridSize/2" v-bind:cy="char.tile.y + gridSize/2" v-bind:r="characterRadius" v-bind:style="'font-size: ' + characterFontSize + 'px;'" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)" v-on:mouseover="tooltipMouseOver" v-on:mouseout="tooltipMouseOut" ></circle>
             <text class="character-initials" v-for="(char, key) in characters" v-bind:x="char.tile.x + gridSize/2" v-bind:y="char.tile.y + gridSize/2" text-anchor="middle" dominant-baseline="middle">{{ char.initials }}</text>
         </svg>
     </div><!-- canvas -->
