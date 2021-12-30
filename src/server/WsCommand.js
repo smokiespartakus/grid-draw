@@ -39,6 +39,7 @@ class WsCommand {
 			const data = this.data;
 			const player = this.player;
 			let autoResolve = true;
+			let game;
 			try {
 				switch (this.cmd) {
 					// case 'send':
@@ -55,19 +56,39 @@ class WsCommand {
 							const g = this.ctrl.createGame();
 							g.id = data.gameId;
 						}
+						game = this.ctrl.find(data.gameId);
 						if (this.ctrl.join(this.user, data.gameId)) {
-							this.result = {success: this.cmd};
+							this.result = {action: this.cmd};
 						}
 						break;
 					case 'set-name':
-						this.user = data.name;
-						this.result = {success: this.cmd, name: data.name};
+						this.user.name = data.name;
+						this.result = {action: this.cmd, name: data.name};
+						if (this.user.gameId) {
+							game = this.ctrl.find(this.user.gameId);
+							if (game) game.touchUpdate();
+						}
 						break;
 					case 'add':
-						this.result = {success: this.cmd};
+						game = this.ctrl.find(this.user.gameId);
+						if (game) {
+							game.addElement(data.elem);
+							// this.result = {success: this.cmd};
+						}
 						break;
 					case 'remove':
-						this.result = {success: this.cmd};
+						game = this.ctrl.find(this.user.gameId);
+						if (game) {
+							game.removeElement(data.elem);
+							// this.result = {success: this.cmd};
+						}
+						break;
+					case 'update':
+						game = this.ctrl.find(this.user.gameId);
+						if (game) {
+							game.updateElement(data.elem);
+							// this.result = {success: this.cmd};
+						}
 						break;
 					default:
 						this.setError('command not found');

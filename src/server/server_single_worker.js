@@ -118,7 +118,7 @@ function onGameSendData(uuid, data) {
 
 
 function onWSDisconnect(user) {
-	if (logger.isDebugEnabled) logger.yellow('Disconnect', user);
+	if (logger.isDebugEnabled) logger.yellow('Disconnect', user.uuid);
 	// user.disconnect();
 	// const appId = user.appId;
 	// const uuid = user.uuid;

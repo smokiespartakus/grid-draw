@@ -86,7 +86,7 @@ class Server {
 	/**
 	 * Send message to websocket connection.
 	 * @param {string} uuid
-	 * @param {{}} data
+	 * @param {{}|string} data
 	 */
 	sendWS(uuid, data) {
 		// logger.debug('sendWS', uuid, data);

@@ -52,6 +52,7 @@ const vueApp = new Vue({
 		tooltipTop: 0,
 		history: [],
 		// auto made
+		users: [],
 		grid: [],
 		tiles: [],
 		points: [],
@@ -128,8 +129,9 @@ const vueApp = new Vue({
 				this.drawCharacterInitials = null;
 			}
 			else if (this.activeElement && this.activeElement.t == 'character') {
-				console.log('fissi!')
 				this.activeElement.tile = tile;
+				Websocket.send({cmd: 'update', elem: this.activeElement});
+				this.activeElement = null;
 			}
 
 		},
@@ -233,6 +235,7 @@ const vueApp = new Vue({
 		setName() {
 			if (this.name) {
 				Websocket.send({cmd: 'set-name', name: this.name});
+				localStorage.setItem('grid-player-name', this.name);
 			}
 		},
 		createGrid() {
@@ -348,13 +351,29 @@ const vueApp = new Vue({
 			// @todo history
 			this.characters.splice(0, this.characters.length);
 		},
-		setElements(data) {
-			console.log('set elements', data);
-			if (!data) return;
-			if (data.lines) this.lines.splice(0, this.lines.length, ...data.lines);
-			if (data.characters) this.characters.splice(0, this.characters.length, ...data.characters);
-			if (data.texts) this.texts.splice(0, this.texts.length, ...data.texts);
-			// set elements
+		setElements(elements) {
+			console.log('set elements', elements);
+			if (!elements) return;
+			let elem;
+			const lines = [];
+			const characters = [];
+			const texts = [];
+			const boxes = [];
+			const circles = [];
+			for (elem of elements) {
+				switch (elem.t) {
+					case 'line': lines.push(elem); break;
+					case 'character': characters.push(elem); break;
+					case 'text': texts.push(elem); break;
+					case 'box': boxes.push(elem); break;
+					case 'circle': circles.push(elem); break;
+				}
+			}
+			this.lines.splice(0, this.lines.length, ...lines);
+			this.characters.splice(0, this.characters.length, ...characters);
+			this.texts.splice(0, this.texts.length, ...texts);
+			this.boxes.splice(0, this.boxes.length, ...boxes);
+			this.circles.splice(0, this.circles.length, ...circles);
 			// set history? or should it only be yours
 		},
 		onOpen() {
@@ -367,14 +386,23 @@ const vueApp = new Vue({
 			console.log('message', msg);
 			if (msg.fail) this.onFail(msg);
 			else {
-				switch(msg.success) {
+				switch(msg.action) {
 					case 'join':
-						this.modalNameShow = true;
+						if (!this.name) {
+							this.modalNameShow = true;
+						} else {
+							this.setName();
+						}
+						// this.addStartElements();
 						break;
 					case 'set-name':
 						this.modalNameShow = false;
 						this.enabled = true;
 						this.runToast('Welcome, ' + msg.name);
+						break;
+					case 'update':
+						this.setElements(msg.elements);
+						this.users.splice(0, this.users.length, ...msg.users);
 						break;
 				}
 			}
@@ -417,6 +445,30 @@ const vueApp = new Vue({
 			this.tooltipTarget = null;
 			// console.log('Out', event.clientX, event.clientY, event.target);
 		},
+		addStartElements() {
+			this.addElement(this.characters, {
+				t: 'character',
+				name: 'Jonas',
+				initials: 'JO',
+				tile: this.tiles[10],
+				color: this.characterColors[1],
+			});
+			this.addElement(this.characters, {
+				t: 'character',
+				name: 'Jonas',
+				initials: 'JO',
+				tile: this.tiles[28],
+				color: this.characterColors[7],
+			});
+			this.addElement(this.characters, {
+				t: 'character',
+				name: 'Jonas',
+				initials: 'JO',
+				tile: this.tiles[173],
+				color: this.characterColors[3],
+			});
+			this.addElement(this.texts, {x: 40, y: 40, text: 'Fissi', t: 'text'});
+		},
 	},
 	mounted() {
 		this.canvas = document.getElementById('canvas');
@@ -425,6 +477,7 @@ const vueApp = new Vue({
 		this.createGrid();
 		this.createGridPoints();
 		this.createGridTiles();
+		this.name = localStorage.getItem('grid-player-name') || null;
 		// this.enabled = true;
 		this.loading = true;
 		Websocket.connect({
@@ -434,29 +487,7 @@ const vueApp = new Vue({
 			onclose: () => {this.onClose();},
 			onmessage: (message) => {this.onMessage(message);},
 		});
-		if (data) this.setElements(data);
-		this.addElement(this.characters, {
-			t: 'character',
-			name: 'Jonas',
-			initials: 'JO',
-			tile: this.tiles[10],
-			color: this.characterColors[1],
-		});
-		this.addElement(this.characters, {
-			t: 'character',
-			name: 'Jonas',
-			initials: 'JO',
-			tile: this.tiles[28],
-			color: this.characterColors[7],
-		});
-		this.addElement(this.characters, {
-			t: 'character',
-			name: 'Jonas',
-			initials: 'JO',
-			tile: this.tiles[173],
-			color: this.characterColors[3],
-		});
-		this.addElement(this.texts, {x: 40, y: 40, text: 'Fissi', t: 'text'});
+		// if (data) this.setElements(data);
 		// @todo get name from localstorage
 		document.addEventListener('keyup', (event) => {
 			switch(event.code) {

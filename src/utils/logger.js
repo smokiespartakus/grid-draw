@@ -107,7 +107,7 @@ const init = function(config, file) {
 		if (level) args[0] += "[" + level + "]";
 		args[0] += "[" + file + "]";
 		if (extraKey) args[0] += "[" + extraKey + "]";
-		if (config.showDebugColors) args[0] += colorEnd;
+		if (config.showDebugColors || color) args[0] += colorEnd;
 		args.length++;
 		return args;
 	}

@@ -63,7 +63,11 @@
             <hr />
             <div class="form-group"><div class="btn-orange" v-on:click="clearElements">Clear Elements</div></div>
             <div class="form-group"><div class="btn-red" v-on:click="clearCharacters">Clear Characters</div></div>
-
+            <div class="form-group"><div class="btn-blue" v-on:click="modalNameShow=true">Change Name</div></div>
+            <hr />
+            <div>Connected:
+                <div v-for="user in users">{{ user.name }}</div>
+            </div>
             <!-- <label for="draw-boxes-btn"><input type="checkbox" id="draw-boxes-btn" v-model="draw.boxes" v-on:change="drawBtnClick('boxes')"/>Boxes</label> -->
             <!-- <label for="draw-circles-btn"><input type="checkbox" id="draw-circles-btn" v-model="draw.circles" v-on:change="drawBtnClick('circles')"/>Circles</label> -->
         </div>

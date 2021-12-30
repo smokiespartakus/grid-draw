@@ -55,6 +55,7 @@ class GameController {
 		this.games.forEach((game) => {
 			game.leave(user);
 		});
+		user.gameId = null;
 	}
 	join(user, gameId) {
 		const game = this.find(gameId);
