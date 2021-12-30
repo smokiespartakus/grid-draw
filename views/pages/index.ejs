@@ -1,18 +1,37 @@
 <% extend('../layouts/base_layout') %>
 <div id="app" class="bg-gray-200 flex justify-center items-center h-full w-full">
     <div class="w-full max-w-xs">
-    <form v-on:submit.prevent="join" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <!--<div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
                 Your Name
             </label>
             <input id="name" name="name" type="text" placeholder="Legolas" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
         </div>-->
-        <div class="mb-4">
-            <button autofocus v-on:click="create" class="btn-blue" type="button">
+        <form v-on:submit.prevent="join" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div class="mb-0">
+            <div class="block text-gray-700 text-sm font-bold mb-2" for="gameid">
+                Create Game
+            </div>
+            <div class="flex items-center justify-between pb-4">
+                <div class="pr-1">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="width">
+                        Tiles width
+                    </label>
+                    <input autofocus id="width" v-model="width" name="width" type="text" placeholder="10" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="pl-1">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="height">
+                       Tiles Height
+                    </label>
+                    <input id="height" v-model="height" name="height" type="text" placeholder="10" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+            </div>
+            <button v-on:click="create" class="btn-blue" type="button">
                 Create Game
             </button>
         </div>
+        </form>
+        <form v-on:submit.prevent="join" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="gameid">
                 ...or Join Game width ID

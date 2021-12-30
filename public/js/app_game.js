@@ -4,6 +4,8 @@ const vueApp = new Vue({
 		loading: false,
 		gameId: gameId,
 		enabled: false,
+		width: 5,
+		height: 5,
 		modalNameShow: false,
 		name: '',
 		toastText: '',
@@ -38,14 +40,13 @@ const vueApp = new Vue({
 			{fill: '#99ffc7', stroke: 'hsl(147 43% 53% / 1)'}, // 147
 			// {fill: '#ff9', stroke: '#bb5'},
 		],
-		characterFontSize: 24,
-		characterRadius: 21,
 		menuShow: false,
 		canvas: null,
-		canvasW: 0,
-		canvasH: 0,
+		gridW: 0,
+		gridH: 0,
 		gridSize: 50,
-		paddingOuter: 0.5,
+		paddingOuterFactor: 0.5,
+		paddingTileFactor: 0.1,
 		textFontSize: 20,
 		tooltipTarget: null,
 		tooltipLeft: 0,
@@ -238,63 +239,54 @@ const vueApp = new Vue({
 				localStorage.setItem('grid-player-name', this.name);
 			}
 		},
+		getVal(val) {
+			return (this.paddingOuterFactor + val) * this.gridSize;
+		},
+		initGrid(width, height) {
+			this.width = width;
+			this.height = height;
+			this.canvas = document.getElementById('canvas');
+			const canvasH = canvas.offsetHeight;
+			const canvasW = canvas.offsetWidth;
+			const pad = 10;
+			const tileSizeH = Math.floor((canvasH - pad) / (this.height + 2 * this.paddingOuterFactor));
+			const tileSizeW = Math.floor((canvasW - pad) / (this.width + 2 * this.paddingOuterFactor));
+			console.log('zzzzzz',this.height, this.width, canvasW, canvasH, tileSizeW, tileSizeH);
+			this.gridSize = Math.min(tileSizeH, tileSizeW);
+			this.gridH = this.gridSize * (this.height + 2 * this.paddingOuterFactor);
+			this.gridW = this.gridSize * (this.width + 2 * this.paddingOuterFactor);
+			this.createGrid();
+			this.createGridPoints();
+			this.createGridTiles();
+		},
 		createGrid() {
-			const canvas = this.canvas;
-			const h = canvas.offsetHeight;
-			const w = canvas.offsetWidth;
-			const padding = this.paddingOuter;
-			const gridSize = this.gridSize;
 			const grid = [];
-			let hh = padding * gridSize;
-			while (hh < h) {
-				grid.push({t: 'grid', x1: 0, x2: w, y1: hh, y2: hh})
-				hh+=gridSize;
+			for (let h=0; h<=this.height; h++) {
+				grid.push({t: 'grid', x1: -1 * this.paddingOuterFactor, x2: this.gridW, y1: h, y2: h})
 			}
-			let ww = padding * gridSize;
-			while (ww < w) {
-				grid.push({t: 'grid', x1: ww, x2: ww, y1: 0, y2: h})
-				ww+=gridSize;
+			for (let w=0; w<=this.width; w++) {
+				grid.push({t: 'grid', x1: w, x2: w, y1: -1 * this.paddingOuterFactor, y2: this.gridH})
 			}
 			this.$set(this, 'grid', grid);
 		},
 		createGridPoints() {
-			const canvas = this.canvas;
-			const h = canvas.offsetHeight;
-			const w = canvas.offsetWidth;
-			const padding = this.paddingOuter;
-			const gridSize = this.gridSize;
 			const pointRadius = 5;
 			const pointsPerTile = 4;
 			const points = [];
-			let hh = padding * gridSize;
-			while (hh < h) {
-				let ww = padding * gridSize;
-				while (ww < w) {
-					points.push({t: 'point', x: ww, y: hh, r: pointRadius})
-					ww+=gridSize / pointsPerTile;
+			for (let h=0; h<=this.height; h+=1/pointsPerTile) {
+				for (let w=0; w<=this.width; w+=1/pointsPerTile) {
+					points.push({t: 'point', x: w, y: h, r: pointRadius})
 				}
-				hh+=gridSize / pointsPerTile;
 			}
 			this.$set(this, 'points', points);
 			// this.points = points;
 		},
 		createGridTiles() {
-			const canvas = this.canvas;
-			const h = canvas.offsetHeight;
-			const w = canvas.offsetWidth;
-			const padding = this.paddingOuter;
-			const tilePadding = 5;
-			const gridSize = this.gridSize;
 			const tiles = [];
-			let hh = padding * gridSize;
-			const tileSize = gridSize - 2 * tilePadding;
-			while (hh < h) {
-				let ww = padding * gridSize;
-				while (ww < w) {
-					tiles.push({t: 'tile', x: ww, y: hh, r: tileSize, pad: tilePadding})
-					ww+=gridSize;
+			for (let h=0; h<this.height; h++) {
+				for (let w=0; w<this.width; w++) {
+					tiles.push({t: 'tile', x: w, y: h})
 				}
-				hh+=gridSize;
 			}
 			this.$set(this, 'tiles', tiles);
 		},
@@ -306,6 +298,7 @@ const vueApp = new Vue({
 		},
 		historyPop() {
 			const action = this.history.pop();
+			console.log('shotyr!', action);
 			if (!action) return;
 			const list = this.getElementArray(action.elem);
 			if (!list) return;
@@ -313,12 +306,20 @@ const vueApp = new Vue({
 			this.activePoint = null;
 			switch (action.action) {
 				case 'add':
-					this.removeElement(list, action.elem);
+					// @todo missing id on the history elements
+					this.removeElement(list, action.elem, false);
 					break;
 				case 'delete':
-					list.push(action.elem);
+					// @todo missing id on the history elements
+					this.addElement(list, action.elem, false);
+					// list.push(action.elem);
 					break;
 			}
+		},
+		historyId(id) {
+			if (!this.history.length) return;
+			const action = this.history[this.history.length - 1];
+			if (action && !action.elem.id) action.elem.id = id;
 		},
 		getElementArray(elem) {
 			if (!elem) return null;
@@ -331,13 +332,14 @@ const vueApp = new Vue({
 			}
 			return null;
 		},
-		addElement(list, elem) {
+		addElement(list, elem, history=true) {
 			list.push(elem);
-			this.historyAdd(elem);
+			if (history) this.historyAdd(elem);
 			Websocket.send({cmd: 'add', elem: elem});
 		},
-		removeElement(list, elem) {
+		removeElement(list, elem, history=true) {
 			list.splice(0, list.length, ...list.filter(e => e != elem));
+			if (history) this.historyDelete(elem);
 			Websocket.send({cmd: 'remove', elem: elem});
 		},
 		clearElements() {
@@ -346,10 +348,14 @@ const vueApp = new Vue({
 			this.boxes.splice(0, this.boxes.length);
 			this.texts.splice(0, this.texts.length);
 			this.circles.splice(0, this.circles.length);
+			// @todo server
+			// Websocket.send({cmd: 'clear-elements'});
 		},
 		clearCharacters() {
 			// @todo history
 			this.characters.splice(0, this.characters.length);
+			// @todo server
+			// Websocket.send({cmd: 'clear-characters'});
 		},
 		setElements(elements) {
 			console.log('set elements', elements);
@@ -393,6 +399,7 @@ const vueApp = new Vue({
 						} else {
 							this.setName();
 						}
+						this.initGrid(msg.game.width, msg.game.height);
 						// this.addStartElements();
 						break;
 					case 'set-name':
@@ -403,6 +410,9 @@ const vueApp = new Vue({
 					case 'update':
 						this.setElements(msg.elements);
 						this.users.splice(0, this.users.length, ...msg.users);
+						break;
+					case 'element-id':
+						this.historyId(msg.id);
 						break;
 				}
 			}
@@ -471,12 +481,6 @@ const vueApp = new Vue({
 		},
 	},
 	mounted() {
-		this.canvas = document.getElementById('canvas');
-		this.canvasH = canvas.offsetHeight;
-		this.canvasW = canvas.offsetWidth;
-		this.createGrid();
-		this.createGridPoints();
-		this.createGridTiles();
 		this.name = localStorage.getItem('grid-player-name') || null;
 		// this.enabled = true;
 		this.loading = true;
@@ -504,7 +508,6 @@ const vueApp = new Vue({
 								this.removeElement(this.characters, this.activeElement);
 								break;
 						}
-						this.historyDelete(this.activeElement);
 						this.activeElement = null;
 					}
 				case 'Escape': // escape
@@ -516,6 +519,7 @@ const vueApp = new Vue({
 					this.activePoint = null;
 					break;
 				case 'KeyZ': //z
+					console.log('zzzzzzzzzzzzzzzzzzzzzzz', event.ctrlKey);
 					if (event.ctrlKey) this.historyPop();
 					break;
 			}

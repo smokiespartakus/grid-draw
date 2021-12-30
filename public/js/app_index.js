@@ -2,15 +2,16 @@ new Vue({
 	el: '#app',
 	data: {
 		gameId: '',
+		width: 12,
+		height: 12,
 	},
 	methods: {
 		async create() {
-			const response = await axios.post('/action/create', {});
-			console.log('response', response.data);
+			if (this.height <= 0 || this.width <= 0) return;
+			const response = await axios.post('/action/create', {w: this.width, h: this.height});
 			if(response.data && response.data.gameId) {
 				this.redirect(response.data.gameId);
 			}
-
 		},
 		join() {
 			if (this.gameId)

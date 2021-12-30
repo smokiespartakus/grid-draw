@@ -637,14 +637,6 @@ Ensure the default browser behavior of the `hidden` attribute.
   --tw-ring-color: rgb(253 186 116 / var(--tw-ring-opacity));
 }
 
-button,
-    input,
-    optgroup,
-    select,
-    textarea {
-  color: #111;
-}
-
 .fixed {
   position: fixed;
 }
@@ -658,6 +650,10 @@ button,
 
 .top-0 {
   top: 0px;
+}
+
+.left-0 {
+  left: 0px;
 }
 
 .right-0 {
@@ -692,6 +688,10 @@ button,
   margin-bottom: 1rem;
 }
 
+.mb-0 {
+  margin-bottom: 0px;
+}
+
 .block {
   display: block;
 }
@@ -724,16 +724,16 @@ button,
   min-height: 100vh;
 }
 
+.w-full {
+  width: 100%;
+}
+
 .w-64 {
   width: 16rem;
 }
 
 .w-10 {
   width: 2.5rem;
-}
-
-.w-full {
-  width: 100%;
 }
 
 .max-w-xs {
@@ -762,6 +762,10 @@ button,
   justify-content: center;
 }
 
+.justify-between {
+  justify-content: space-between;
+}
+
 .overflow-hidden {
   overflow: hidden;
 }
@@ -770,12 +774,12 @@ button,
   overflow-y: auto;
 }
 
-.rounded-lg {
-  border-radius: 0.5rem;
-}
-
 .rounded {
   border-radius: 0.25rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
 }
 
 .rounded-bl-md {
@@ -789,6 +793,11 @@ button,
 .bg-blue-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(96 165 250 / var(--tw-bg-opacity));
+}
+
+.bg-black {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity));
 }
 
 .bg-gray-500 {
@@ -837,6 +846,16 @@ button,
 .px-0 {
   padding-left: 0px;
   padding-right: 0px;
+}
+
+.py-0\.5 {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+
+.py-0 {
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .px-4 {
@@ -888,6 +907,14 @@ button,
   padding-bottom: 2rem;
 }
 
+.pr-1 {
+  padding-right: 0.25rem;
+}
+
+.pl-1 {
+  padding-left: 0.25rem;
+}
+
 .text-left {
   text-align: left;
 }
@@ -926,6 +953,11 @@ button,
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.text-gray-800 {
+  --tw-text-opacity: 1;
+  color: rgb(31 41 55 / var(--tw-text-opacity));
 }
 
 .text-gray-700 {

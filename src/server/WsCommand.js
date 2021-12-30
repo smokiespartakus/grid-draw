@@ -52,18 +52,19 @@ class WsCommand {
 						break;
 					case 'join':
 						// @tmp need to be able to restart server while testing
-						if (data.gameId && !this.ctrl.find(data.gameId)) {
-							const g = this.ctrl.createGame();
+						if (config.environment == 'local' && data.gameId && !this.ctrl.find(data.gameId)) {
+							const g = this.ctrl.createGame(16,12);
 							g.id = data.gameId;
 						}
-						game = this.ctrl.find(data.gameId);
-						if (this.ctrl.join(this.user, data.gameId)) {
-							this.result = {action: this.cmd};
+						// game = this.ctrl.find(data.gameId);
+						game = this.ctrl.join(this.user, data.gameId);
+						if (game) {
+							this.result = {action: 'join', game: game.toObject()};
 						}
 						break;
 					case 'set-name':
 						this.user.name = data.name;
-						this.result = {action: this.cmd, name: data.name};
+						this.result = {action: 'set-name', name: data.name};
 						if (this.user.gameId) {
 							game = this.ctrl.find(this.user.gameId);
 							if (game) game.touchUpdate();
@@ -72,8 +73,8 @@ class WsCommand {
 					case 'add':
 						game = this.ctrl.find(this.user.gameId);
 						if (game) {
-							game.addElement(data.elem);
-							// this.result = {success: this.cmd};
+							const elem = game.addElement(data.elem);
+							this.result = {action: 'element-id', id: elem.id};
 						}
 						break;
 					case 'remove':

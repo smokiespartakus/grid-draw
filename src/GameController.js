@@ -34,11 +34,10 @@ class GameController {
 	/**
 	 *
 	 * @param players
-	 * @param mode
 	 * @return {Game}
 	 */
-	createGame() {
-		const game = new Game(this.getNewId());
+	createGame(width, height) {
+		const game = new Game(this.getNewId(), width, height);
 		this.games.push(game);
 		game.setSendDataFn(this.sendDataFn);
 		return game;
@@ -63,7 +62,7 @@ class GameController {
 			throw new GameError('Game not found.');
 		}
 		game.join(user);
-		return true;
+		return game;
 	}
 	cleanGames() {
 		let i, game;

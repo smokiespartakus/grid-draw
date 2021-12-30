@@ -10,7 +10,11 @@ class Game {
 	lastUpdate = 0;
 	fps = 10;
 	_elemId = 1;
-	constructor(id) {
+	width;
+	height;
+	constructor(id, width, height) {
+		this.width = width;
+		this.height = height;
 		this.id = id;
 		this.interval = setInterval(() => {
 			// logger.cyan('interval', this.lastUpdate, this.lastSend);
@@ -55,6 +59,7 @@ class Game {
 		elem.id = this.nextId();
 		this.elements.push(elem);
 		this.touchUpdate();
+		return elem;
 	}
 
 	removeElement(elem) {
@@ -91,6 +96,13 @@ class Game {
 	}
 	nextId() {
 		return this._elemId++;
+	}
+	toObject() {
+		return {
+			id: this.id,
+			width: this.width,
+			height: this.height,
+		};
 	}
 }
 module.exports = Game;

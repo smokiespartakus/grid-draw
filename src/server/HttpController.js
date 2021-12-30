@@ -171,7 +171,7 @@ class HttpController {
 		const action = req.params.action;
 		switch (action) {
 			case 'create':
-				const game = this.gameController.createGame();
+				const game = this.gameController.createGame(parseInt(req.body.w), parseInt(req.body.h));
 				res.send(JSON.stringify({gameId: game.id}));
 				break;
 			case 'get':

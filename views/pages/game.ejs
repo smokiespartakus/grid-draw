@@ -7,26 +7,26 @@
     <transition name="fade">
         <div id="toast-error" class="toast text-red-400 z-10" v-if="toastError">{{ toastError }}</div>
     </transition>
-    <div id="canvas">
-        <svg v-bind:viewBox="'0 0 ' + canvasW + ' ' + canvasH" v-bind:width="canvasW" v-bind:height="canvasH">
+    <div id="canvas" class="flex items-center justify-center w-full h-full fixed top-0 left-0">
+        <svg v-bind:viewBox="'0 0 ' + gridW + ' ' + gridH" v-bind:width="gridW" v-bind:height="gridH" class="">
             <!-- grid -->
-            <line class="grid-vertice" v-for="line in grid" v-bind:x1="line.x1" v-bind:x2="line.x2" v-bind:y1="line.y1" v-bind:y2="line.y2" />
+            <line class="grid-vertice" v-for="line in grid" v-bind:x1="getVal(line.x1)" v-bind:x2="getVal(line.x2)" v-bind:y1="getVal(line.y1)" v-bind:y2="getVal(line.y2)" />
 
             <!-- grid tiles -->
-            <rect v-show="tilesActive" v-for="(tile, key) in tiles" class="grid-tile" v-bind:x="tile.x + tile.pad" v-bind:y="tile.y + tile.pad" v-bind:width="tile.r" v-bind:height="tile.r" v-on:click="tileClick(key)"/>
+            <rect v-show="tilesActive" v-for="(tile, key) in tiles" class="grid-tile" v-bind:x="getVal(tile.x) + paddingTileFactor * gridSize" v-bind:y="getVal(tile.y) + paddingTileFactor * gridSize" v-bind:width="gridSize - 2*paddingTileFactor*gridSize" v-bind:height="gridSize - 2*paddingTileFactor*gridSize" v-on:click="tileClick(key)"/>
 
             <!-- drawn lines -->
-            <line  v-for="(line, key) in lines" v-bind:class="'grid-line element ' + (activeElement == line ? ' active' : '')" v-bind:x1="line.x1" v-bind:x2="line.x2" v-bind:y1="line.y1" v-bind:y2="line.y2" v-on:click="lineClick(key)" />
+            <line  v-for="(line, key) in lines" v-bind:class="'grid-line element ' + (activeElement == line ? ' active' : '')" v-bind:x1="getVal(line.x1)" v-bind:x2="getVal(line.x2)" v-bind:y1="getVal(line.y1)" v-bind:y2="getVal(line.y2)" v-on:click="lineClick(key)" />
 
             <!-- texts -->
-            <text v-for="(text, key) in texts" v-bind:class="'grid-text element ' + (activeElement == text ? ' active' : '')" v-bind:x="text.x" v-bind:y="text.y + textFontSize / 2" v-on:click="textClick" data-type="text" v-bind:data-key="key" v-bind:style="'font-size: ' + textFontSize + 'px;'" dominant-baseline="middle">{{ text.text }}</text>
+            <text v-for="(text, key) in texts" v-bind:class="'grid-text element ' + (activeElement == text ? ' active' : '')" v-bind:x="getVal(text.x)" v-bind:y="getVal(text.y) + textFontSize / 2" v-on:click="textClick" data-type="text" v-bind:data-key="key" v-bind:style="'font-size: ' + textFontSize + 'px;'" dominant-baseline="middle">{{ text.text }}</text>
 
             <!-- grid points -->
-            <rect v-show="pointsActive" v-for="(point, key) in points" v-bind:class="'grid-point' + (activePoint == point ? ' active' : '')" v-bind:x="point.x - point.r" v-bind:y="point.y - point.r" v-bind:width="point.r*2" v-bind:height="point.r*2" v-on:click="pointClick(key)"/>
+            <rect v-show="pointsActive" v-for="(point, key) in points" v-bind:class="'grid-point' + (activePoint == point ? ' active' : '')" v-bind:x="getVal(point.x) - point.r" v-bind:y="getVal(point.y) - point.r" v-bind:width="point.r*2" v-bind:height="point.r*2" v-on:click="pointClick(key)"/>
 
             <!-- characters -->
-            <circle v-for="(char, key) in characters" v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:tooltip="char.name" v-bind:cx="char.tile.x + gridSize/2" v-bind:cy="char.tile.y + gridSize/2" v-bind:r="characterRadius" v-bind:style="'font-size: ' + characterFontSize + 'px;'" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)" v-on:mouseover="tooltipMouseOver" v-on:mouseout="tooltipMouseOut" ></circle>
-            <text class="character-initials" v-for="(char, key) in characters" v-bind:x="char.tile.x + gridSize/2" v-bind:y="char.tile.y + gridSize/2" text-anchor="middle" dominant-baseline="middle">{{ char.initials }}</text>
+            <circle v-for="(char, key) in characters" v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:tooltip="char.name" v-bind:cx="getVal(char.tile.x) + gridSize/2" v-bind:cy="getVal(char.tile.y) + gridSize/2" v-bind:r="gridSize * 0.4" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)" v-on:mouseover="tooltipMouseOver" v-on:mouseout="tooltipMouseOut" ></circle>
+            <text class="character-initials" v-for="(char, key) in characters" v-bind:x="getVal(char.tile.x) + gridSize/2" v-bind:y="getVal(char.tile.y) + gridSize/2" text-anchor="middle" dominant-baseline="middle">{{ char.initials }}</text>
         </svg>
     </div><!-- canvas -->
 
@@ -61,8 +61,8 @@
             <div class="small" v-if="draw.text">Click on the grid to place text</div>
             <div class="menu-error" v-if="drawTextError">{{ drawTextError }}</div>
             <hr />
-            <div class="form-group"><div class="btn-orange" v-on:click="clearElements">Clear Elements</div></div>
-            <div class="form-group"><div class="btn-red" v-on:click="clearCharacters">Clear Characters</div></div>
+<!--            <div class="form-group"><div class="btn-orange" v-on:click="clearElements">Clear Elements</div></div>-->
+<!--            <div class="form-group"><div class="btn-red" v-on:click="clearCharacters">Clear Characters</div></div>-->
             <div class="form-group"><div class="btn-blue" v-on:click="modalNameShow=true">Change Name</div></div>
             <hr />
             <div>Connected:
