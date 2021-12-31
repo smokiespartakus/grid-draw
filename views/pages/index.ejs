@@ -7,7 +7,7 @@
             </label>
             <input id="name" name="name" type="text" placeholder="Legolas" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
         </div>-->
-        <form v-on:submit.prevent="join" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <form v-on:submit.prevent="create" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <div class="mb-0">
             <div class="block text-gray-700 text-sm font-bold mb-2" for="gameid">
                 Create Game
@@ -26,7 +26,7 @@
                     <input id="height" v-model="height" name="height" type="text" placeholder="10" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
             </div>
-            <button v-on:click="create" class="btn-blue" type="button">
+            <button class="btn-blue" type="submit">
                 Create Game
             </button>
         </div>
@@ -39,7 +39,7 @@
             <input id="gameid" v-model="gameId" name="gameid" type="text" placeholder="abc123" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
         </div>
         <div class="">
-            <button v-on:click="join" class="btn-blue" type="button">
+            <button class="btn-blue" type="submit">
                 Join Game
             </button>
         </div>
