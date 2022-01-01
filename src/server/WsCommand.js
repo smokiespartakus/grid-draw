@@ -35,7 +35,7 @@ class WsCommand {
 		this.data = data;
 	}
 	async run() {
-		return new Promise((resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 			const data = this.data;
 			const player = this.player;
 			let autoResolve = true;
@@ -52,9 +52,14 @@ class WsCommand {
 						break;
 					case 'join':
 						// @tmp need to be able to restart server while testing
-						if (process.env.APP_ENV == 'local' && data.gameId && !this.ctrl.find(data.gameId)) {
-							const g = this.ctrl.createGame(16,12);
-							g.id = data.gameId;
+						// if (process.env.APP_ENV == 'local' && data.gameId && !this.ctrl.find(data.gameId)) {
+						// 	const g = this.ctrl.createGame(16,12);
+						// 	g.id = data.gameId;
+						// }
+						if (process.env.BACKUP_ENABLED) {
+							if (!this.ctrl.find(data.gameId)) {
+								const x = await this.ctrl.createGameFromBackup(data.gameId);
+							}
 						}
 						// game = this.ctrl.find(data.gameId);
 						game = this.ctrl.join(this.user, data.gameId);

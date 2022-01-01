@@ -43,6 +43,23 @@ class GameController {
 		return game;
 	}
 
+	/**
+	 *
+	 * @param id
+	 * @return {Game}
+	 */
+	async createGameFromBackup(id) {
+		if (this.find(id)) {
+			return null;
+			// throw new GameError('Cannot create game from backup. Already exists.');
+		}
+		const game = await Game.fromBackup(id);
+		if (!game) return null;
+		this.games.push(game);
+		game.setSendDataFn(this.sendDataFn);
+		return game;
+	}
+
 	hasGame(gameId) {
 		return !!this.find(gameId);
 	}
@@ -101,7 +118,6 @@ class GameController {
 		return id;
 		// return "#" + new Date().getTime().toString(36);
 	}
-
 
 }
 module.exports = GameController;
