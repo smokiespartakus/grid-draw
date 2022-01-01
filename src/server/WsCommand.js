@@ -1,7 +1,7 @@
 
 const logger = require('../utils/logger').init(require('path').basename(__filename));
 
-const { GameError, ExtendedError } = require('../errors');
+const { GameError } = require('../errors');
 const GameController = require('../GameController');
 
 class WsCommand {

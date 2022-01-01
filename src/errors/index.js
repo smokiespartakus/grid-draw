@@ -1,5 +1,6 @@
 const glob = require( 'glob' );
 const path = require( 'path' );
+const paths = require( '../helpers/paths' );
 // const fs = require ( 'fs' );
 // //
 // const logger = require('../../utils/logger').init(path.basename(__filename));
@@ -8,7 +9,7 @@ const dontLoad = ['index'];
 
 const errors = {};
 // const types = {};
-glob.sync( 'src/errors/*.js' ).forEach( function( file ) {
+glob.sync( path.join(paths.root, 'src/errors/*.js') ).forEach( function( file ) {
 	const effectName = path.posix.basename(file).replace('.js', '');
 	if (dontLoad.indexOf(effectName) === -1) {
 		// console.log('load effect', effectName);
