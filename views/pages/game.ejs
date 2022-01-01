@@ -2,7 +2,7 @@
 
 <div id="app" v-cloak>
     <transition name="fade">
-        <div id="toast-text" class="toast" v-if="toastText">{{ toastText }}</div>
+        <div id="toast-text" class="toast text-gray-400" v-if="toastText">{{ toastText }}</div>
     </transition>
     <transition name="fade">
         <div id="toast-error" class="toast text-red-400 z-10" v-if="toastError">{{ toastError }}</div>
@@ -32,8 +32,10 @@
 
     <!-- Menu -->
     <transition name="fade">
-        <div id="menu" v-cloak v-if="menuShow" class="text-white rounded-bl-md px-2 py-6 fixed z-5 top-0 right-0 bg-blue-400 w-64 drop-shadow">
-            <div class="bold">{{name}} / {{ gameId }}</div>
+        <div id="menu" v-cloak v-if="menuShow" class="text-white rounded-bl-md px-2 py-6 fixed z-20 top-0 right-0 bg-blue-400 w-64 drop-shadow">
+            <div class="font-bold text-sm">ID: {{gameId}}</div>
+            <div v-if="connected" class="font-bold text-sm text-green-400">Connected as: {{name}}</div>
+            <div v-else class="text-red-400 font-bold cursor-pointer" v-on:click="connect">Not connected <i class="fa fa-reload"></i></div>
             <div>Draw:</div>
             <label for="draw-lines-btn" class="draw-label"><input type="checkbox" id="draw-lines-btn" v-model="draw.lines" v-on:change="drawBtnClick('lines')"/>Lines</label>
 
@@ -65,14 +67,20 @@
 <!--            <div class="form-group"><div class="btn-red" v-on:click="clearCharacters">Clear Characters</div></div>-->
             <div class="form-group"><div class="btn-blue" v-on:click="modalNameShow=true">Change Name</div></div>
             <hr />
-            <div>Connected:
+            <div class="pb-4 text-sm"><span class="font-bold">Players:</span>
                 <div v-for="user in users">{{ user.name }}</div>
+            </div>
+            <div class="pb-4 text-sm">
+                <span class="font-bold">Keyboard:</span>
+                <div>ESC: deselect</div>
+                <div>Del: deleted selected</div>
+                <div>CTRL+z: undo</div>
             </div>
             <!-- <label for="draw-boxes-btn"><input type="checkbox" id="draw-boxes-btn" v-model="draw.boxes" v-on:change="drawBtnClick('boxes')"/>Boxes</label> -->
             <!-- <label for="draw-circles-btn"><input type="checkbox" id="draw-circles-btn" v-model="draw.circles" v-on:change="drawBtnClick('circles')"/>Circles</label> -->
         </div>
     </transition>
-    <div id="menu-button" v-if="enabled" v-on:click="menuShow=!menuShow" class="btn-blue px-0 w-10 fixed top-1 right-1 z-10">
+    <div id="menu-button" v-if="enabled" v-on:click="menuShow=!menuShow" class="btn-blue px-0 w-10 fixed top-1 right-1 z-30">
         <transition name="fade">
             <i class="fas fa-times" v-if="menuShow"></i>
             <i class="fas fa-bars" v-else></i>

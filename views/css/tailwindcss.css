@@ -16,4 +16,7 @@
     .btn-orange, button.btn-orange {
         @apply bg-orange-500 hover:bg-orange-700 text-white focus:ring-orange-300 btn;
     }
+    .toast {
+        @apply w-full h-full text-5xl fixed top-0 left-0 p-4 pt-20 font-bold text-center
+    }
 }

@@ -4,6 +4,7 @@ const vueApp = new Vue({
 		loading: false,
 		gameId: gameId,
 		enabled: false,
+		connected: false,
 		width: 5,
 		height: 5,
 		modalNameShow: false,
@@ -386,7 +387,8 @@ const vueApp = new Vue({
 			Websocket.send({cmd:'join', gameId: this.gameId});
 		},
 		onClose() {
-
+			this.connected = false;
+			this.toastError = 'Disconnected!';
 		},
 		onMessage(msg) {
 			console.log('message', msg);
@@ -394,6 +396,7 @@ const vueApp = new Vue({
 			else {
 				switch(msg.action) {
 					case 'join':
+						this.connected = true;
 						if (!this.name) {
 							this.modalNameShow = true;
 						} else {
@@ -479,18 +482,21 @@ const vueApp = new Vue({
 			});
 			this.addElement(this.texts, {x: 40, y: 40, text: 'Fissi', t: 'text'});
 		},
+		connect() {
+			Websocket.connect({
+				debug: true,
+				autoReconnect: true,
+				onopen: () => {this.onOpen();},
+				onclose: () => {this.onClose();},
+				onmessage: (message) => {this.onMessage(message);},
+			});
+		},
 	},
 	mounted() {
 		this.name = localStorage.getItem('grid-player-name') || null;
 		// this.enabled = true;
 		this.loading = true;
-		Websocket.connect({
-			debug: true,
-			autoReconnect: true,
-			onopen: () => {this.onOpen();},
-			onclose: () => {this.onClose();},
-			onmessage: (message) => {this.onMessage(message);},
-		});
+		this.connect();
 		// if (data) this.setElements(data);
 		// @todo get name from localstorage
 		document.addEventListener('keyup', (event) => {

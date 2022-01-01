@@ -35,7 +35,7 @@ html, body {
     border-top:  1px solid #3d759f;
 }
 .toast {
-    width: 100%;
+ /*   width: 100%;
     height: 100%;
     position: fixed;
     top: 0;
@@ -46,6 +46,7 @@ html, body {
     font-size: 4em;
     font-weight: bold;
     text-align: center;
+*/
 }
 #canvas {
 }
