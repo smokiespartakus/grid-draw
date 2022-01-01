@@ -1,6 +1,6 @@
 // use `nodemon server` to auto reload on save
-require('dotenv').config();
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const logger = require('./src/utils/logger').init(path.basename(__filename));
 const readline = require('readline').createInterface({
 	input: process.stdin,

@@ -6,7 +6,7 @@ $ nodemon server
 // Configuration
 
 
-require("dotenv").config();
+// require("dotenv").config();
 
 const logger = require('../utils/logger').init(require('path').basename(__filename));
 
