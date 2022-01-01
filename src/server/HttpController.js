@@ -18,6 +18,7 @@ class HttpController {
 	constructor(onHttpMessage, gameController) {
 		this.gameController = gameController;
 		this.onHttpMessage = onHttpMessage;
+		this.created = new Date();
 	}
 
 	register(app) {
@@ -45,36 +46,21 @@ class HttpController {
 			res.render('pages/index');
 			// res.sendFile(path.join(rootDir, 'public', 'index.html'));
 		});
+
+		app.post('/', (req, res) => {
+			res.json({Hello: 'World!'});
+		});
+
 		/*
 		 * Render Status page
 		 * need to put this behind credentials at some point
 		 */
 		app.get('/status', (req, res) => {
-//		console.log('get status', process.pid);
-			const uuid = uuidV4();
-			let interval, timeout;
-			interval = setInterval(() => {
-				if (!this.isStatusDataSet(uuid)) return;
-				// const statusData = this.statusData;
-				clearInterval(interval);
-				clearTimeout(timeout);
-				this.renderStatus(req, res, this.statusData[uuid]);
-				delete this.statusData[uuid];
-				// logger.yellow('len', Object.values(this.statusData).length);
-			}, 100);
-
-			this.onHttpMessage('get-status', {uuid: uuid});
-
-			timeout = setTimeout(() => {
-				clearInterval(interval);
-				clearTimeout(timeout);
-				this.renderStatus(req, res, {error: 'status-get timed out.'});
-				delete this.statusData[uuid];
-			}, 5000);
-		});
-
-		app.post('/', (req, res) => {
-			res.json({Hello: 'World!'});
+			const games = this.gameController.getGames();
+			res.render('pages/status', {
+				started: this.created.toString().split(' GMT')[0],
+				games: games,
+			});
 		});
 
 		app.get('/game/:id?', (req, res) => {
@@ -125,42 +111,6 @@ class HttpController {
 		 * @param {http response} res
 		 * @returns {undefined}
 		 */
-	}
-
-	renderStatus(req, res, statusData) {
-		const file = 'pages/status';
-		let serverStarted = new Date(statusData.serverStarted);
-		let now = new Date(statusData.now);
-		// if (logger.isDebugEnabled) logger.log(matchesByApp);
-		const sinceRestart = Math.floor(((new Date()).getTime() - serverStarted.getTime()) / 1000 / 3);
-		const r = Math.min(128, sinceRestart);
-		const gb = Math.max(128, 255-sinceRestart);
-		const renderData = {
-			...statusData, ...{
-				// reboot: signals.check('reboot'),
-				serverStarted: serverStarted + "",
-				now: now,
-				timeColor: 'rgb(' + r + ',' + gb + ',' + gb + ')',
-				appName: process.env.APP_NAME,
-				bodyBG: process.env.STATUS_BG || null,
-			},
-		};
-		// logger.yellow('fissi', renderData);
-		res.render(file, renderData);
-
-	}
-
-	setStatusData(data, uuid) {
-		this.statusData[uuid] = data;
-	}
-
-	isStatusDataSet(uuid) {
-		return this.statusData[uuid];
-//		if (process.env.WORKER_MODE == 'redis') {
-		// wait for all cores to return data
-//			return statusData.workersReturned == workerCount;
-//		}
-// 		return true;
 	}
 
 	_postAction(req, res) {

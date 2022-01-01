@@ -12,10 +12,12 @@ class Game {
 	_elemId = 1;
 	width;
 	height;
+	created;
 	constructor(id, width, height) {
 		this.width = width;
 		this.height = height;
 		this.id = id;
+		this.created = (new Date()).getTime();
 		this.interval = setInterval(() => {
 			// logger.cyan('interval', this.lastUpdate, this.lastSend);
 			if (this.isDirty()) {
@@ -103,6 +105,13 @@ class Game {
 			width: this.width,
 			height: this.height,
 		};
+	}
+	toObjectWithUsers() {
+		const data = this.toObject();
+		data.created = (new Date(this.created)).toString().split(' GMT')[0];
+		data.lastUpdate = (new Date(this.lastUpdate)).toString().split(' GMT')[0];
+		data.users = this.users.map(u => u.toObject());
+		return data;
 	}
 }
 module.exports = Game;
