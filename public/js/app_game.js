@@ -8,6 +8,7 @@ const vueApp = new Vue({
 		width: 5,
 		height: 5,
 		modalNameShow: false,
+		modalInfoShow: false,
 		name: '',
 		toastText: '',
 		toastTimeout: null,
