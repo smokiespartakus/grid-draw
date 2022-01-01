@@ -1,5 +1,5 @@
-const config = require('../config');
-const logger = require('./utils/logger').init(config, require('path').basename(__filename));
+
+const logger = require('./utils/logger').init(require('path').basename(__filename));
 const Game = require('./Game');
 const User = require('./User');
 const { GameError } = require('./errors');

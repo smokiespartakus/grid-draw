@@ -1,5 +1,5 @@
-const config = require('../../config');
-const logger = require('../utils/logger').init(config, require('path').basename(__filename));
+
+const logger = require('../utils/logger').init(require('path').basename(__filename));
 const uuidV4 = require('uuid').v4;
 const User = require('../User');
 

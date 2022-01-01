@@ -18,8 +18,8 @@ const GameController = require('../GameController'); //(postApi, debug);
 const ConnectionList = require('../utils/connection_list');
 const WsController = require('./WsController');
 const HttpController = require('./HttpController');
-const config = require('../../config');
-const logger = require('../utils/logger').init(config, require('path').basename(__filename));
+
+const logger = require('../utils/logger').init(require('path').basename(__filename));
 // require('../data/onstart');
 
 
@@ -50,36 +50,13 @@ class Server {
 // Create server from express app
 		const server = http.Server(app);
 // start server
-		this.serverListen(server, config.server.port, config.server.domain);
+		this.serverListen(server, process.env.LISTEN_PORT, process.env.LISTEN_DOMAIN || null);
 // create websocket server
 		const wsServer = new websocket({
 			httpServer: server,
 		});
 		wsController.register(wsServer, this.workerId);
 		// registerWS(wsServer, this.workerId);
-
-		/*
-		 * Create APP with SSL
-		 */
-		if (config.serverSSL) {
-			const cert = {
-				key: fs.readFileSync(config.serverSSL.key).toString(),
-				cert: fs.readFileSync(config.serverSSL.cert).toString(),
-			};
-			// Create Express web app
-			const appSSL = express(cert);
-			registerApp(appSSL);
-			// Create server from express app
-			const serverSSL = https.Server(cert, appSSL);
-			// start server
-			this.serverListen(serverSSL, config.serverSSL.port, config.serverSSL.domain);
-			// create websocket server
-			const wsServerSSL = new websocket({
-				httpServer: serverSSL,
-			});
-			wsController.register(wsServer, this.workerId);
-			// registerWS(wsServerSSL, this.workerId);
-		}
 
 	}
 

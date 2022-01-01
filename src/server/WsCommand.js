@@ -1,5 +1,5 @@
-const config = require('../../config');
-const logger = require('../utils/logger').init(config, require('path').basename(__filename));
+
+const logger = require('../utils/logger').init(require('path').basename(__filename));
 
 const { GameError, ExtendedError } = require('../errors');
 const GameController = require('../GameController');
@@ -52,7 +52,7 @@ class WsCommand {
 						break;
 					case 'join':
 						// @tmp need to be able to restart server while testing
-						if (config.environment == 'local' && data.gameId && !this.ctrl.find(data.gameId)) {
+						if (process.env.APP_ENV == 'local' && data.gameId && !this.ctrl.find(data.gameId)) {
 							const g = this.ctrl.createGame(16,12);
 							g.id = data.gameId;
 						}

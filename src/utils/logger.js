@@ -9,43 +9,46 @@ const colorBlue = "\u001b[34m";
 const colorRed = "\u001b[31m";
 const colorCyan = "\u001b[36m";
 
-const init = function(config, file) {
-	const levelDebug = config.debugLevel >=4;
-	const levelInfo = config.debugLevel >=3;
-	const levelWarn = config.debugLevel >=2;
-	const levelError = config.debugLevel >=1;
+const init = function(file) {
+	const level = process.env.DEBUG_LEVEL || 0;
+	const isOn = process.env.APP_DEBUG || false;
+	const levelDebug = level >=4;
+	const levelInfo = level >=3;
+	const levelWarn = level >=2;
+	const levelError = level >=1;
+	const debugColors = process.env.DEBUG_COLORS || false;
 	let extraKey = null;
 	const logger = {
-		isDebugEnabled: config.debug && levelDebug,
-		isInfoEnabled: config.debug && levelInfo,
-		isWarnEnabled: config.debug && levelWarn,
-		isErrorEnabled: config.debug && levelError,
+		isDebugEnabled: isOn && levelDebug,
+		isInfoEnabled: isOn && levelInfo,
+		isWarnEnabled: isOn && levelWarn,
+		isErrorEnabled: isOn && levelError,
 		log() {
-			if( config.debug && levelDebug ) {
+			if( isOn && levelDebug ) {
 				console.log.apply(this, addTimestamp(arguments, 'd'));
 			}
 		},
 		debug() {
-			if( config.debug && levelDebug ) {
+			if( isOn && levelDebug ) {
 				console.log.apply(this, addTimestamp(arguments, 'd'));
 			}
 		},
 		info() {
-			if( config.debug && levelInfo )
+			if( isOn && levelInfo )
 				console.log.apply(this, addTimestamp(arguments, 'i'));
 		},
 		warn() {
-			if( config.debug && levelWarn )
+			if( isOn && levelWarn )
 				console.log.apply(this, addTimestamp(arguments, 'w'));
 
 		},
 		warning() {
-			if( config.debug && levelWarn )
+			if( isOn && levelWarn )
 				console.log.apply(this, addTimestamp(arguments, 'w'));
 
 		},
 		error() {
-			if( config.debug && levelError )
+			if( isOn && levelError )
 				console.log.apply(this, addTimestamp(arguments, 'e'));
 		},
 		always() {
@@ -55,31 +58,31 @@ const init = function(config, file) {
 			extraKey = key;
 		},
 		red() {
-			if ( config.debug && levelInfo)
+			if ( isOn && levelInfo)
 				console.log.apply(this, addTimestamp(arguments, 'd', 'red'));
 		},
 		green() {
-			if ( config.debug && levelInfo)
+			if ( isOn && levelInfo)
 				console.log.apply(this, addTimestamp(arguments, 'd', 'green'));
 		},
 		blue() {
-			if ( config.debug && levelInfo)
+			if ( isOn && levelInfo)
 				console.log.apply(this, addTimestamp(arguments, 'd', 'blue'));
 		},
 		yellow() {
-			if ( config.debug && levelInfo)
+			if ( isOn && levelInfo)
 				console.log.apply(this, addTimestamp(arguments, 'd', 'yellow'));
 		},
 		magenta() {
-			if ( config.debug && levelInfo)
+			if ( isOn && levelInfo)
 				console.log.apply(this, addTimestamp(arguments, 'd', 'magenta'));
 		},
 		cyan() {
-			if ( config.debug && levelInfo)
+			if ( isOn && levelInfo)
 				console.log.apply(this, addTimestamp(arguments, 'd', 'cyan'));
 		},
 		purple() {
-			if ( config.debug && levelInfo)
+			if ( isOn && levelInfo)
 				console.log.apply(this, addTimestamp(arguments, 'd', 'magenta'));
 		},
 		getColorStart(color) {
@@ -101,13 +104,13 @@ const init = function(config, file) {
 			args[i+1] = args[i];
 		}
 		if (color) args[0] = getColor2(color);
-		else if (config.showDebugColors) args[0] = getColor(level);
+		else if (debugColors) args[0] = getColor(level);
 		else args[0] = '';
 		args[0] += "[" + tt + "]";
 		if (level) args[0] += "[" + level + "]";
 		args[0] += "[" + file + "]";
 		if (extraKey) args[0] += "[" + extraKey + "]";
-		if (config.showDebugColors || color) args[0] += colorEnd;
+		if (debugColors || color) args[0] += colorEnd;
 		args.length++;
 		return args;
 	}

@@ -1,5 +1,5 @@
-const config = require('../../config');
-const logger = require('./logger').init(config, require('path').basename(__filename));
+
+const logger = require('./logger').init(require('path').basename(__filename));
 const Random = require('./random');
 
 class Timer {

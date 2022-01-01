@@ -7,8 +7,8 @@ $ nodemon server
 
 
 require("dotenv").config();
-const config = require('../../config');
-const logger = require('../utils/logger').init(config, require('path').basename(__filename));
+
+const logger = require('../utils/logger').init(require('path').basename(__filename));
 
 logger.always("Starting server...", getTimeString());
 

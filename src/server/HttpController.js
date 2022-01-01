@@ -1,5 +1,5 @@
-const config = require('../../config');
-const logger = require('../utils/logger').init(config, require('path').basename(__filename));
+
+const logger = require('../utils/logger').init(require('path').basename(__filename));
 const Random = require('../utils/random');
 const fs = require('fs');
 const bodyParser = require('body-parser');
@@ -143,8 +143,8 @@ class HttpController {
 				serverStarted: serverStarted + "",
 				now: now,
 				timeColor: 'rgb(' + r + ',' + gb + ',' + gb + ')',
-				appName: config.appName,
-				bodyBG: config.statusPage ? config.statusPage.bodyBG : null,
+				appName: process.env.APP_NAME,
+				bodyBG: process.env.STATUS_BG || null,
 			},
 		};
 		// logger.yellow('fissi', renderData);
@@ -158,7 +158,7 @@ class HttpController {
 
 	isStatusDataSet(uuid) {
 		return this.statusData[uuid];
-//		if (config.mode == 'redis') {
+//		if (process.env.WORKER_MODE == 'redis') {
 		// wait for all cores to return data
 //			return statusData.workersReturned == workerCount;
 //		}
