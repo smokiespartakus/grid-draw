@@ -21,6 +21,7 @@ const HttpController = require('./HttpController');
 
 const logger = require('../utils/logger').init(require('path').basename(__filename));
 // require('../data/onstart');
+const paths = require('../helpers/paths');
 
 
 /**
@@ -44,7 +45,7 @@ class Server {
 		// const registerWS = RegisterWS(this.isServerReady, this.getServerStatus, this.connections, onWSMessage);
 // Create Express web app
 		const app = express({});
-		app.use(express.static('public'));
+		app.use(express.static(paths.public));
 		this.httpController.register(app);
 		// this.httpApp = registerApp(app);
 // Create server from express app

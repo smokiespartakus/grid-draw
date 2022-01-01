@@ -7,9 +7,7 @@ const path = require('path');
 const uuidV4 = require('uuid').v4;
 // const performance = require('perf_hooks').performance;
 // const workerCount = require('os').cpus().length;
-const rootDir = path.dirname(path.join(__dirname, '..'));
-const publicDir = path.join(rootDir, 'public');
-const viewDir = path.join(rootDir, 'views');
+const paths = require('../helpers/paths');
 
 class HttpController {
 	statusData = {};
@@ -30,7 +28,7 @@ class HttpController {
 		}));
 		app.engine('ejs', require('express-ejs-extend'));
 		app.set('view engine', 'ejs');
-		app.set('views', viewDir);
+		app.set('views', paths.views);
 		//console.log(">>>>>>", express.staticProvider);
 
 		//app.get('/server', postAction);
@@ -95,7 +93,7 @@ class HttpController {
 		 * Get all the other files and pages (mostly for js/css/pics)
 		 */
 		app.get('/*', (req, res) => {
-			let file = path.join(rootDir, 'public', req.url);
+			let file = path.join(paths.root, 'public', req.url);
 			let stats;
 			try {
 				stats = fs.lstatSync(file);
@@ -109,7 +107,7 @@ class HttpController {
 			try {
 				view = 'pages/' + req.url.split('/')[1];
 //			console.log(view);
-				file = path.join(viewDir, view + '.ejs');
+				file = path.join(paths.views, view + '.ejs');
 				stats2 = fs.lstatSync(file);
 			} catch (e) {
 			}
