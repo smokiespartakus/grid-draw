@@ -2,7 +2,7 @@ const vueApp = new Vue({
 	el: '#app',
 	data: {
 		style: 'normal',
-		role: 'gm',
+		role: 'player',
 		roles: {
 			'player': 'Player',
 			'gm': 'Game Master',
@@ -354,7 +354,6 @@ const vueApp = new Vue({
 		},
 		historyPop() {
 			const action = this.history.pop();
-			console.log('shotyr!', action);
 			if (!action) return;
 			const list = this.getElementArray(action.elem);
 			if (!list) return;
@@ -385,6 +384,7 @@ const vueApp = new Vue({
 				case 'character': return this.characters;
 				case 'circle': return this.circles;
 				case 'box': return this.boxes;
+				case 'mask': return this.masks;
 			}
 			return null;
 		},
