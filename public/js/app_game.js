@@ -5,7 +5,7 @@ const vueApp = new Vue({
 		styles: {
 			normal: '',
 			fantasy: 'fantasy',
-			// 'sci-fi': 'sci-fi',
+			'sci-fi': 'sci-fi',
 		},
 		loading: false,
 		gameId: gameId,
@@ -142,6 +142,7 @@ const vueApp = new Vue({
 				this.activeElement.tile = tile;
 				Websocket.send({cmd: 'update', elem: this.activeElement});
 				this.activeElement = null;
+				this.tilesActive = false;
 			}
 
 		},
@@ -525,10 +526,8 @@ const vueApp = new Vue({
 						this.activeElement = null;
 					}
 				case 'Escape': // escape
-					if (this.activeElement) {
-						this.tilesActive = false;
-						this.pointsActive = false;
-					}
+					this.tilesActive = false;
+					this.pointsActive = false;
 					this.activeElement = null;
 					this.activePoint = null;
 					break;
