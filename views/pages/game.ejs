@@ -1,14 +1,17 @@
 <% extend('../layouts/base_layout', {title: 'GRID'}) %>
 
 <div id="app" v-cloak>
-	<transition name="fade">
-		<div id="toast-text" class="toast text-gray-400" v-if="toastText">{{ toastText }}</div>
-	</transition>
-	<transition name="fade">
-		<div id="toast-error" class="toast text-red-400 z-10" v-if="toastError">{{ toastError }}</div>
-	</transition>
-	<div id="canvas" class="flex items-center justify-center w-full h-full fixed top-0 left-0">
-		<svg v-bind:viewBox="'0 0 ' + gridW + ' ' + gridH" v-bind:width="gridW" v-bind:height="gridH" class="">
+	<div id="canvas" v-bind:class="'flex items-center justify-center w-full h-full fixed top-0 left-0 ' + style">
+        <div v-bind:style="'width:'+(gridW + marginCanvas)+'px; height:'+(gridH + marginCanvas)+'px;'" class="relative">
+        <div id="parchment" v-if="style=='fantasy' && gridW>0" v-bind:style="'width:'+(gridW + marginCanvas)+'px; height:'+(gridH + marginCanvas)+'px;'" class="absolute top-0 left-0"></div>
+        <div id="metal" class="metal linear" v-if="style=='sci-fi' && gridW>0" v-bind:style="'width:'+(gridW + marginCanvas)+'px; height:'+(gridH + marginCanvas)+'px;'" class="absolute top-0 left-0"></div>
+        <transition name="fade">
+           <div id="toast-text" class="toast text-gray-500" v-if="toastText">{{ toastText }}</div>
+        </transition>
+        <transition name="fade">
+            <div id="toast-error" class="toast text-red-500 z-10" v-if="toastError">{{ toastError }}</div>
+        </transition>
+		<svg v-bind:viewBox="'0 0 ' + gridW + ' ' + gridH" class="absolute" v-bind:style="'top:' + marginCanvas/2 +'px; left:'+marginCanvas/2+'px;'" v-bind:width="gridW" v-bind:height="gridH">
 			<!-- grid -->
 			<line class="grid-vertice" v-for="line in grid" v-bind:x1="getVal(line.x1)" v-bind:x2="getVal(line.x2)" v-bind:y1="getVal(line.y1)" v-bind:y2="getVal(line.y2)" />
 
@@ -28,6 +31,7 @@
 			<circle v-for="(char, key) in characters" v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:tooltip="char.name" v-bind:cx="getVal(char.tile.x) + gridSize/2" v-bind:cy="getVal(char.tile.y) + gridSize/2" v-bind:r="gridSize * 0.4" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)" v-on:mouseover="tooltipMouseOver" v-on:mouseout="tooltipMouseOut" ></circle>
 			<text class="character-initials" v-for="(char, key) in characters" v-bind:x="getVal(char.tile.x) + gridSize/2" v-bind:y="getVal(char.tile.y) + gridSize/2" text-anchor="middle" dominant-baseline="middle">{{ char.initials }}</text>
 		</svg>
+        </div>
 	</div><!-- canvas -->
 
 	<!-- Menu -->
@@ -67,6 +71,11 @@
 <!--            <div class="form-group"><div class="btn-red" v-on:click="clearCharacters">Clear Characters</div></div>-->
 			<div class="form-group"><div class="btn-blue" v-on:click="modalNameShow=true">Change Name</div></div>
 			<hr />
+            <label for="style-select">Style:</label>
+            <select id="style-select" v-model="style" class="block px-3 py-1.5 text-base font-normal bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none text-gray-800">
+                <option v-for="(val, key) in styles" v-bind:value="val">{{ key }}</option>
+            </select>
+            <hr />
 			<div class="pb-4 text-sm"><span class="font-bold">Players:</span>
 				<div v-for="user in users">{{ user.name }}</div>
 			</div>
@@ -149,6 +158,16 @@
 	</div>
 	</transition>
 </div><!-- app 0-->
+<svg>
+    <filter id="wavy1">
+        <feTurbulence x="0" y="0" baseFrequency="0.02" numOctaves="5" seed="5"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" scale="5"></feDisplacementMap>
+    </filter>
+    <filter id="wavy2">
+        <feTurbulence x="0" y="0" baseFrequency="0.02" numOctaves="5" seed="1"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" scale="20"></feDisplacementMap>
+    </filter>
+</svg>
 <script type="text/javascript">
 const gameId = '<%= gameId %>';
 const data = <%= JSON.stringify(data) %>;

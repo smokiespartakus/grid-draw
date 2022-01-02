@@ -1,6 +1,12 @@
 const vueApp = new Vue({
 	el: '#app',
 	data: {
+		style: '',
+		styles: {
+			normal: '',
+			fantasy: 'fantasy',
+			// 'sci-fi': 'sci-fi',
+		},
 		loading: false,
 		gameId: gameId,
 		enabled: false,
@@ -47,6 +53,7 @@ const vueApp = new Vue({
 		gridW: 0,
 		gridH: 0,
 		gridSize: 50,
+		marginCanvas: 20,
 		paddingOuterFactor: 0.5,
 		paddingTileFactor: 0.1,
 		textFontSize: 20,
@@ -250,9 +257,8 @@ const vueApp = new Vue({
 			this.canvas = document.getElementById('canvas');
 			const canvasH = canvas.offsetHeight;
 			const canvasW = canvas.offsetWidth;
-			const pad = 10;
-			const tileSizeH = Math.floor((canvasH - pad) / (this.height + 2 * this.paddingOuterFactor));
-			const tileSizeW = Math.floor((canvasW - pad) / (this.width + 2 * this.paddingOuterFactor));
+			const tileSizeH = Math.floor((canvasH - this.marginCanvas * 2) / (this.height + 2 * this.paddingOuterFactor));
+			const tileSizeW = Math.floor((canvasW - this.marginCanvas * 2) / (this.width + 2 * this.paddingOuterFactor));
 			console.log('zzzzzz',this.height, this.width, canvasW, canvasH, tileSizeW, tileSizeH);
 			this.gridSize = Math.min(tileSizeH, tileSizeW);
 			this.gridH = this.gridSize * (this.height + 2 * this.paddingOuterFactor);
@@ -495,6 +501,7 @@ const vueApp = new Vue({
 	},
 	mounted() {
 		this.name = localStorage.getItem('grid-player-name') || null;
+		this.style = localStorage.getItem('grid-style') || '';
 		// this.enabled = true;
 		this.loading = true;
 		this.connect();
@@ -532,5 +539,10 @@ const vueApp = new Vue({
 			}
 			console.log(event.key, event.code, event.keyCode, event);
 		});
+	},
+	watch: {
+		style (val) {
+			localStorage.setItem('grid-style', val);
+		},
 	},
 });
