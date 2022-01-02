@@ -1,10 +1,10 @@
 <% extend('../layouts/base_layout', {title: 'GRID'}) %>
 
 <div id="app" v-cloak>
-	<div id="canvas" v-bind:class="'flex items-center justify-center w-full h-full fixed top-0 left-0 ' + style">
+	<div id="canvas" v-bind:class="'flex items-center justify-center w-full h-full fixed top-0 left-0 style-'+style + ' role-'+role">
         <div v-bind:style="'width:'+(gridW + marginCanvas)+'px; height:'+(gridH + marginCanvas)+'px;'" class="relative">
         <div id="parchment" v-if="style=='fantasy' && gridW>0" v-bind:style="'width:'+(gridW + marginCanvas)+'px; height:'+(gridH + marginCanvas)+'px;'" class="absolute top-0 left-0"></div>
-        <div id="metal" class="metal linear" v-if="style=='sci-fi' && gridW>0" v-bind:style="'width:'+(gridW + marginCanvas)+'px; height:'+(gridH + marginCanvas)+'px;'" class="absolute top-0 left-0"></div>
+        <div id="metal" class="metal linear" v-if="style=='scifi' && gridW>0" v-bind:style="'width:'+(gridW + marginCanvas)+'px; height:'+(gridH + marginCanvas)+'px;'" class="absolute top-0 left-0"></div>
         <transition name="fade">
            <div id="toast-text" class="toast text-gray-500" v-if="toastText">{{ toastText }}</div>
         </transition>
@@ -12,25 +12,54 @@
             <div id="toast-error" class="toast text-red-500 z-10" v-if="toastError">{{ toastError }}</div>
         </transition>
 		<svg v-bind:viewBox="'0 0 ' + gridW + ' ' + gridH" class="absolute" v-bind:style="'top:' + marginCanvas/2 +'px; left:'+marginCanvas/2+'px;'" v-bind:width="gridW" v-bind:height="gridH">
+            <defs>
+                <mask id="masked" maskUnits="userSpaceOnUse" v-if="role=='player'">
+                    <rect x="0" y="0" v-bind:width="gridW" v-bind:height="gridH" fill="white" />
+                    <rect v-for="mask in masks" v-bind:x="getVal(mask.x)-4" v-bind:y="getVal(mask.y)-4" v-bind:width="getDist(mask.width)+8" v-bind:height="getDist(mask.height)+8" fill="#000"></rect>
+                </mask>
+                <clipPath id="cut-off-bottom">
+                    <rect x="0" y="0" width="200" height="100" />
+                </clipPath>
+            </defs>
 			<!-- grid -->
+            <g id="vertices-group">
 			<line class="grid-vertice" v-for="line in grid" v-bind:x1="getVal(line.x1)" v-bind:x2="getVal(line.x2)" v-bind:y1="getVal(line.y1)" v-bind:y2="getVal(line.y2)" />
+            </g>
 
 			<!-- grid tiles -->
+            <g id="tiles-group">
 			<rect v-show="tilesActive" v-for="(tile, key) in tiles" class="grid-tile" v-bind:x="getVal(tile.x) + paddingTileFactor * gridSize" v-bind:y="getVal(tile.y) + paddingTileFactor * gridSize" v-bind:width="gridSize - 2*paddingTileFactor*gridSize" v-bind:height="gridSize - 2*paddingTileFactor*gridSize" v-on:click="tileClick(key)"/>
+            </g>
 
 			<!-- drawn lines -->
-			<line  v-for="(line, key) in lines" v-bind:class="'grid-line element ' + (activeElement == line ? ' active' : '')" v-bind:x1="getVal(line.x1)" v-bind:x2="getVal(line.x2)" v-bind:y1="getVal(line.y1)" v-bind:y2="getVal(line.y2)" v-on:click="lineClick(key)" />
+            <g id="lines-group">
+			<line  v-for="(line, key) in lines" mask="url(#masked)" v-bind:class="'grid-line element ' + (activeElement == line ? ' active' : '')" v-bind:x1="getVal(line.x1)" v-bind:x2="getVal(line.x2)" v-bind:y1="getVal(line.y1)" v-bind:y2="getVal(line.y2)" v-on:click="lineClick(key)"/>
+            </g>
 
 			<!-- texts -->
-			<text v-for="(text, key) in texts" v-bind:class="'grid-text element ' + (activeElement == text ? ' active' : '')" v-bind:x="getVal(text.x)" v-bind:y="getVal(text.y) + textFontSize / 2" v-on:click="textClick" data-type="text" v-bind:data-key="key" v-bind:style="'font-size: ' + textFontSize + 'px;'" dominant-baseline="middle">{{ text.text }}</text>
+            <g id="texts-group">
+			<text v-for="(text, key) in texts" mask="url(#masked)" v-bind:class="'grid-text element ' + (activeElement == text ? ' active' : '')" v-bind:x="getVal(text.x)" v-bind:y="getVal(text.y) + textFontSize / 2" v-on:click="textClick" data-type="text" v-bind:data-key="key" v-bind:style="'font-size: ' + textFontSize + 'px;'" dominant-baseline="middle">{{ text.text }}</text>
+            </g>
 
-			<!-- grid points -->
-			<rect v-show="pointsActive" v-for="(point, key) in points" v-bind:class="'grid-point' + (activePoint == point ? ' active' : '')" v-bind:x="getVal(point.x) - point.r" v-bind:y="getVal(point.y) - point.r" v-bind:width="point.r*2" v-bind:height="point.r*2" v-on:click="pointClick(key)"/>
+            <!-- characters -->
+            <g id="characters-group">
+			<circle v-for="(char, key) in characters" mask="url(#masked)"  v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:tooltip="char.name" v-bind:cx="getVal(char.tile.x) + gridSize/2" v-bind:cy="getVal(char.tile.y) + gridSize/2" v-bind:r="gridSize * 0.4" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)" v-on:mouseover="tooltipMouseOver" v-on:mouseout="tooltipMouseOut" ></circle>
+			<text class="character-initials select-none" mask="url(#masked)" v-for="(char, key) in characters" v-bind:x="getVal(char.tile.x) + gridSize/2" v-bind:y="getVal(char.tile.y) + gridSize/2" text-anchor="middle" dominant-baseline="middle">{{ char.initials }}</text>
+            </g>
 
-			<!-- characters -->
-			<circle v-for="(char, key) in characters" v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:tooltip="char.name" v-bind:cx="getVal(char.tile.x) + gridSize/2" v-bind:cy="getVal(char.tile.y) + gridSize/2" v-bind:r="gridSize * 0.4" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)" v-on:mouseover="tooltipMouseOver" v-on:mouseout="tooltipMouseOut" ></circle>
-			<text class="character-initials select-none" v-for="(char, key) in characters" v-bind:x="getVal(char.tile.x) + gridSize/2" v-bind:y="getVal(char.tile.y) + gridSize/2" text-anchor="middle" dominant-baseline="middle">{{ char.initials }}</text>
-		</svg>
+            <!-- game master mask drawing box -->
+            <rect v-if="role=='gm' && drawType=='masks' && activePoint" v-bind:x="getVal(maskDrawRect.x)" v-bind:y="getVal(maskDrawRect.y)" v-bind:width="getDist(maskDrawRect.w)" v-bind:height="getDist(maskDrawRect.h)" fill="rgba(255,0,0,.5)" stroke="#f00"></rect>
+
+            <!-- game master masks -->
+            <g id="masks-group">
+                <rect v-if="role=='gm' && masksShow" v-for="(mask, key) in masks" v-bind:class="'gm-mask-rect' + (activeElement == mask ? ' active' : '')" v-bind:x="getVal(mask.x)-4" v-bind:y="getVal(mask.y)-4" v-bind:width="getDist(mask.width)+8" v-bind:height="getDist(mask.height)+8" fill="rgba(100,0,0,.6)" v-on:click="maskClick(key)"></rect>
+            </g>
+
+            <!-- grid points -->
+            <g id="points-group">
+                <rect v-show="pointsActive" v-for="(point, key) in points" v-bind:class="'grid-point' + (activePoint == point ? ' active' : '')" v-bind:x="getVal(point.x) - point.r" v-bind:y="getVal(point.y) - point.r" v-bind:width="point.r*2" v-bind:height="point.r*2" v-on:click="pointClick(key)" v-on:mouseover="pointMouse(key)"/>
+            </g>
+        </svg>
         </div>
 	</div><!-- canvas -->
 
@@ -40,6 +69,12 @@
 			<div class="font-bold text-sm">ID: {{gameId}}</div>
 			<div v-if="connected" class="font-bold text-sm text-green-400">Connected as: {{name}}</div>
 			<div v-else class="text-red-400 font-bold cursor-pointer" v-on:click="connect">Not connected <i class="fa fa-redo"></i></div>
+            <label for="role-select">Role:</label>
+            <select id="role-select" v-model="role" class="block px-3 py-1.5 text-base font-normal bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none text-gray-800">
+                <option v-for="(val, key) in roles" v-bind:value="key">{{ val }}</option>
+            </select>
+            <hr />
+            <div v-if="role=='gm'">
 			<div>Draw:</div>
 			<label for="draw-lines-btn" class="draw-label"><input type="checkbox" id="draw-lines-btn" v-model="draw.lines" v-on:change="drawBtnClick('lines')"/>Lines</label>
 
@@ -67,13 +102,18 @@
 			<div class="small" v-if="draw.text">Click on the grid to place text</div>
 			<div class="menu-error" v-if="drawTextError">{{ drawTextError }}</div>
 			<hr />
+            <label for="draw-masks-btn" class="draw-label"><input type="checkbox" id="draw-masks-btn" v-model="draw.masks" v-on:change="drawBtnClick('masks')"/>Masks</label>
+            <label for="show-masks-btn" class="draw-label"><input type="checkbox" id="show-masks-btn" v-model="masksShow"/>Masks Visible</label>
+
+            <hr />
 <!--            <div class="form-group"><div class="btn-orange" v-on:click="clearElements">Clear Elements</div></div>-->
 <!--            <div class="form-group"><div class="btn-red" v-on:click="clearCharacters">Clear Characters</div></div>-->
+            </div>
 			<div class="form-group"><div class="btn-blue" v-on:click="modalNameShow=true">Change Name</div></div>
 			<hr />
             <label for="style-select">Style:</label>
             <select id="style-select" v-model="style" class="block px-3 py-1.5 text-base font-normal bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none text-gray-800">
-                <option v-for="(val, key) in styles" v-bind:value="val">{{ key }}</option>
+                <option v-for="(val, key) in styles" v-bind:value="key">{{ val }}</option>
             </select>
             <hr />
 			<div class="pb-4 text-sm"><span class="font-bold">Players:</span>

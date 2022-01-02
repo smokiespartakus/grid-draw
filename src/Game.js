@@ -58,6 +58,7 @@ class Game {
 			game.lastUpdate = data.lastUpdate || 0;
 			game.created = data.created;
 			game.elements = data.elements;
+			game._elemId = data.elemId;
 			return game;
 		} else {
 			// throw new GameError('Backup does not exist for ' + id);

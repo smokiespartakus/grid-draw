@@ -66,7 +66,17 @@ html, body {
     stroke: transparent;
     fill:  transparent;
 }
-.grid-point:hover {
+.role-gm .gm-mask-rect {
+    cursor: pointer;
+}
+.role-gm .gm-mask-rect:hover {
+    stroke: #f00;
+    stroke-width: 3px;
+}
+.role-gm .gm-mask-rect.active {
+    fill: #f00;
+}
+.role-gm .grid-point:hover {
     stroke: blue;
 }
 .grid-point.active {
@@ -98,7 +108,7 @@ html, body {
     fill: #000;
     stroke-width: 0;
 }
-.grid-text:hover {
+.role-gm .grid-text:hover {
     fill: #00f;
 }
 .grid-text.active {
@@ -165,76 +175,82 @@ input[type=text] {
     box-sizing: border-box;
 }
 
-.fantasy {
+.style-fantasy {
     background: #2b2219;
 }
 
-.fantasy .grid-vertice {
+.style-fantasy .grid-vertice {
     stroke: #b28d74;
 }
 
-.fantasy svg {
+.style-fantasy svg {
     filter: url(#wavy1);
 }
 
-.fantasy .character:hover {
+.style-fantasy .character:hover {
     stroke: #00ff00;
 }
 
-.fantasy .grid-text {
+.style-fantasy .grid-text {
     fill: #604a3f;
 }
-.fantasy .grid-text:hover {
+.role-gm .style-fantasy .grid-text:hover {
     fill: #b39b39;
 }
-.fantasy .grid-text.active {
+.role-gm .style-fantasy .grid-text.active {
     fill: #f00;
 }
 
 
-.sci-fi {
+.style-scifi {
     background: #19222b;
 }
 
-.sci-fi .grid-vertice {
+.style-scifi .grid-vertice {
     stroke: rgba(100, 200, 255, 0.6);
     /*filter: drop-shadow(0px 0px 2px #0cf);*/
     filter: url(#blue-glow);
 }
 
-.sci-fi .grid-line {
+.style-scifi .grid-line {
     stroke: #fff;
 }
 
-.sci-fi .grid-text {
+.style-scifi .grid-text {
     color: #fff;
 }
 
-.sci-fi .grid-point:hover {
+.role-gm .style-scifi .grid-point:hover {
     stroke: #00ffff;
 }
-.sci-fi .grid-point.active {
+.role-gm .style-scifi .grid-point.active {
     fill: #00ffff;
 }
 
-.sci-fi .grid-tile:hover {
+.style-scifi .grid-tile:hover {
     fill: rgb(61 186 218 / 20%);
 }
-.sci-fi .grid-text:hover {
+.role-gm .style-scifi .grid-text:hover {
     fill: #0ff;
 }
-.sci-fi .grid-text.active {
+.role-gm .style-scifi .grid-text.active {
     fill: #f00;
 }
 
-.sci-fi .character:hover {
+.style-scifi .character:hover {
     stroke: #0ff;
 }
-.sci-fi .character.active {
+.style-scifi .character.active {
     stroke: #f00;
 }
 .element.active {
     stroke: red;
+}
+.role-player .grid-point,
+.role-player .grid-line,
+.role-player .grid-text
+{
+    cursor: default;
 }
 #metal {
     border-radius: 0.2rem;

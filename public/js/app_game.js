@@ -1,11 +1,16 @@
 const vueApp = new Vue({
 	el: '#app',
 	data: {
-		style: '',
+		style: 'normal',
+		role: 'gm',
+		roles: {
+			'player': 'Player',
+			'gm': 'Game Master',
+		},
 		styles: {
-			normal: '',
-			fantasy: 'fantasy',
-			'sci-fi': 'sci-fi',
+			normal: 'Normal',
+			fantasy: 'Fantasy',
+			scifi: 'Sci-Fi',
 		},
 		loading: false,
 		gameId: gameId,
@@ -13,6 +18,7 @@ const vueApp = new Vue({
 		connected: false,
 		width: 5,
 		height: 5,
+		masksShow: true,
 		modalNameShow: false,
 		modalInfoShow: false,
 		name: '',
@@ -29,6 +35,7 @@ const vueApp = new Vue({
 			boxes: false,
 			circles: false,
 			character: false,
+			masks: false,
 		},
 		drawTextValue: '',
 		drawTextError: '',
@@ -60,6 +67,7 @@ const vueApp = new Vue({
 		tooltipTarget: null,
 		tooltipLeft: 0,
 		tooltipTop: 0,
+		maskDrawRect: {x: 0, y: 0, h: 0, w: 0},
 		history: [],
 		// auto made
 		users: [],
@@ -72,6 +80,7 @@ const vueApp = new Vue({
 		circles: [],
 		characters: [],
 		texts: [],
+		masks: [],
 	},
 	methods: {
 		pointClick(index) {
@@ -98,13 +107,16 @@ const vueApp = new Vue({
 					this.addElement(this.texts, {t:'text', x: point.x, y: point.y, text: this.drawTextValue});
 					nothingHappened = false;
 					break;
-				case 'character':
-					if (!this.drawCharacterName || !this.drawCharacterInitials) {
-						this.menuError = 'Name and initials required before placing.';
-						return null;
+				case 'masks':
+					if (this.activePoint && this.activePoint != point) {
+						const x = Math.min(point.x, this.activePoint.x);
+						const y = Math.min(point.y, this.activePoint.y);
+						const w = Math.abs(point.x - this.activePoint.x);
+						const h = Math.abs(point.y - this.activePoint.y);
+						this.addElement(this.masks, {t:'mask', x: x, y: y, width: w, height: h });
+						this.activePoint = null;
+						nothingHappened = false;
 					}
-					this.addElement(this.characters, {t:'character', x: point.x, y: point.y, initials: this.drawCharacterInitials, name: this.drawCharacterName});
-					nothingHappened = false;
 					break;
 			}
 			if (nothingHappened) {
@@ -114,7 +126,23 @@ const vueApp = new Vue({
 					this.activePoint = point;
 				}
 			}
-
+		},
+		pointMouse(index) {
+			const point = this.points[index];
+			if (!point) {
+				console.warn('point not found', index);
+				return;
+			}
+			if (this.drawType == 'masks') {
+				if (this.activePoint) {
+					this.maskDrawRect = {
+						x: Math.min(point.x, this.activePoint.x),
+						y: Math.min(point.y, this.activePoint.y),
+						w: Math.abs(point.x - this.activePoint.x),
+						h: Math.abs(point.y - this.activePoint.y),
+					};
+				}
+			}
 		},
 		tileClick(index) {
 			const tile = this.tiles[index];
@@ -187,6 +215,20 @@ const vueApp = new Vue({
 				this.tilesActive = true;
 			}
 		},
+		maskClick(index) {
+			const mask = this.masks[index];
+			if (!mask) {
+				console.warn('mask not found', index);
+				return;
+			}
+			this.drawBtnClick('unset');
+			if (this.activeElement == mask) {
+				this.activeElement = null;
+				this.tilesActive = false;
+			} else {
+				this.activeElement = mask;
+			}
+		},
 		elementClick(event) {
 			// Could be used, but feels like there are separate options by element type
 			const index = parseInt(event.target.getAttribute('data-key'));
@@ -215,6 +257,7 @@ const vueApp = new Vue({
 			for (let key of Object.keys(this.draw)) {
 				if (key !== type) this.$set(this.draw, key, false);
 			}
+			this.maskStartPoint = null;
 			this.tilesActive = false;
 			this.pointsActive = false;
 			this.activePoint = null;
@@ -225,6 +268,7 @@ const vueApp = new Vue({
 					case 'boxes':
 					case 'circles':
 					case 'text':
+					case 'masks':
 						this.pointsActive = true;
 						break;
 					case 'character':
@@ -251,6 +295,9 @@ const vueApp = new Vue({
 		},
 		getVal(val) {
 			return (this.paddingOuterFactor + val) * this.gridSize;
+		},
+		getDist(val) {
+			return val * this.gridSize;
 		},
 		initGrid(width, height) {
 			this.width = width;
@@ -375,6 +422,7 @@ const vueApp = new Vue({
 			const texts = [];
 			const boxes = [];
 			const circles = [];
+			const masks = [];
 			for (elem of elements) {
 				switch (elem.t) {
 					case 'line': lines.push(elem); break;
@@ -382,6 +430,7 @@ const vueApp = new Vue({
 					case 'text': texts.push(elem); break;
 					case 'box': boxes.push(elem); break;
 					case 'circle': circles.push(elem); break;
+					case 'mask': masks.push(elem); break;
 				}
 			}
 			this.lines.splice(0, this.lines.length, ...lines);
@@ -389,6 +438,7 @@ const vueApp = new Vue({
 			this.texts.splice(0, this.texts.length, ...texts);
 			this.boxes.splice(0, this.boxes.length, ...boxes);
 			this.circles.splice(0, this.circles.length, ...circles);
+			this.masks.splice(0, this.masks.length, ...masks);
 			// set history? or should it only be yours
 		},
 		onOpen() {
@@ -502,7 +552,7 @@ const vueApp = new Vue({
 	},
 	mounted() {
 		this.name = localStorage.getItem('grid-player-name') || null;
-		this.style = localStorage.getItem('grid-style') || '';
+		this.style = localStorage.getItem('grid-style') || 'normal';
 		// this.enabled = true;
 		this.loading = true;
 		this.connect();
@@ -522,21 +572,27 @@ const vueApp = new Vue({
 							case 'character':
 								this.removeElement(this.characters, this.activeElement);
 								break;
+							case 'mask':
+								this.removeElement(this.masks, this.activeElement);
+								break;
 						}
 						this.activeElement = null;
 					}
 				case 'Escape': // escape
-					this.tilesActive = false;
-					this.pointsActive = false;
-					this.activeElement = null;
-					this.activePoint = null;
+					if (this.activePoint) {
+						this.activePoint = null;
+					} else if(this.activeElement) {
+						this.activeElement = null;
+					} else {
+						this.tilesActive = false;
+						this.pointsActive = false;
+					}
 					break;
 				case 'KeyZ': //z
-					console.log('zzzzzzzzzzzzzzzzzzzzzzz', event.ctrlKey);
 					if (event.ctrlKey) this.historyPop();
 					break;
 			}
-			console.log(event.key, event.code, event.keyCode, event);
+			// console.log(event.key, event.code, event.keyCode, event);
 		});
 	},
 	watch: {
