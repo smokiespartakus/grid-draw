@@ -64,6 +64,7 @@ const vueApp = new Vue({
 		paddingOuterFactor: 0.5,
 		paddingTileFactor: 0.1,
 		textFontSize: 20,
+		characterFontSize: 20,
 		tooltipTarget: null,
 		tooltipLeft: 0,
 		tooltipTop: 0,
@@ -313,6 +314,8 @@ const vueApp = new Vue({
 			const tileSizeW = Math.floor((canvasW - this.marginCanvas * 2) / (this.width + 2 * this.paddingOuterFactor));
 			console.log('zzzzzz',this.height, this.width, canvasW, canvasH, tileSizeW, tileSizeH);
 			this.gridSize = Math.min(tileSizeH, tileSizeW);
+			this.textFontSize = this.gridSize;
+			this.characterFontSize = Math.floor(this.gridSize / 2);
 			this.gridH = this.gridSize * (this.height + 2 * this.paddingOuterFactor);
 			this.gridW = this.gridSize * (this.width + 2 * this.paddingOuterFactor);
 			this.createGrid();
@@ -331,7 +334,10 @@ const vueApp = new Vue({
 		},
 		createGridPoints() {
 			const pointRadius = 5;
-			const pointsPerTile = 4;
+			let pointsPerTile = 4;
+			const tiles = this.width * this.height;
+			if (tiles > 1100) pointsPerTile = 1;
+			else if (tiles > 600) pointsPerTile = 2;
 			const points = [];
 			for (let h=0; h<=this.height; h+=1/pointsPerTile) {
 				for (let w=0; w<=this.width; w+=1/pointsPerTile) {
