@@ -173,6 +173,13 @@ const vueApp = new Vue({
 				this.activeElement = null;
 				this.tilesActive = false;
 			}
+			else if (this.draw.text) {
+				if (!this.drawTextValue) {
+					this.menuError = 'Text required before placing.';
+					return;
+				}
+				this.addElement(this.texts, {t:'text', x: tile.x + 0.5, y: tile.y + 0.5, text: this.drawTextValue});
+			}
 
 		},
 		textClick(event) {
@@ -268,10 +275,10 @@ const vueApp = new Vue({
 					case 'lines':
 					case 'boxes':
 					case 'circles':
-					case 'text':
 					case 'masks':
 						this.pointsActive = true;
 						break;
+					case 'text':
 					case 'character':
 						this.tilesActive = true;
 						break;
