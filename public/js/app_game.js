@@ -162,9 +162,9 @@ const vueApp = new Vue({
 					initials: this.drawCharacterInitials,
 					tile: tile,
 				});
-				this.drawCharacterColor = null;
-				this.drawCharacterName = null;
-				this.drawCharacterInitials = null;
+				// this.drawCharacterColor = null;
+				// this.drawCharacterName = null;
+				// this.drawCharacterInitials = null;
 			}
 			else if (this.activeElement && this.activeElement.t == 'character') {
 				this.activeElement.tile = tile;
@@ -284,7 +284,11 @@ const vueApp = new Vue({
 		},
 		characterNameKeyUp() {
 			if (this.drawCharacterName) {
-				this.drawCharacterInitials = this.drawCharacterName.substr(0,2).toUpperCase();
+				const names = this.drawCharacterName.split(' ');
+				if (names.length > 1)
+					this.drawCharacterInitials = (names[0].substr(0,1) + names[1].substr(0,1)).toUpperCase();
+				else
+					this.drawCharacterInitials = names[0].substr(0,2).toUpperCase();
 			}
 		},
 		setName() {
