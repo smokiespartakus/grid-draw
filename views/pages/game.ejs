@@ -15,7 +15,7 @@
             <defs>
                 <mask id="masked" maskUnits="userSpaceOnUse" v-if="role=='player'">
                     <rect x="0" y="0" v-bind:width="gridW" v-bind:height="gridH" fill="white" />
-                    <rect v-for="mask in masks" v-bind:x="getVal(mask.x)-4" v-bind:y="getVal(mask.y)-4" v-bind:width="getDist(mask.width)+8" v-bind:height="getDist(mask.height)+8" fill="#000"></rect>
+                    <rect v-for="mask in masks" v-bind:x="getVal(mask.x)-4" v-bind:y="getVal(mask.y)-4" v-bind:width="getDist(mask.w)+8" v-bind:height="getDist(mask.h)+8" fill="#000"></rect>
                 </mask>
                 <clipPath id="cut-off-bottom">
                     <rect x="0" y="0" width="200" height="100" />
@@ -33,36 +33,54 @@
 
 			<!-- drawn lines -->
             <g id="lines-group">
-			<line  v-for="(line, key) in lines" mask="url(#masked)" v-bind:class="'grid-line element ' + (activeElement == line ? ' active' : '')" v-bind:x1="getVal(line.x1)" v-bind:x2="getVal(line.x2)" v-bind:y1="getVal(line.y1)" v-bind:y2="getVal(line.y2)" v-on:click="lineClick(key)"/>
+			    <polyline  v-for="(line, key) in lines" mask="url(#masked)" v-bind:class="'grid-line element ' + (activeElement == line ? ' active' : '')" v-bind:points="getLinePoints(line)" v-on:click="lineClick(key)"/>
+<!--                <line  v-for="(line, key) in lines" mask="url(#masked)" v-bind:class="'grid-line element ' + (activeElement == line ? ' active' : '')" v-bind:x1="getVal(line.x1)" v-bind:x2="getVal(line.x2)" v-bind:y1="getVal(line.y1)" v-bind:y2="getVal(line.y2)" v-on:click="lineClick(key)"/>-->
+            </g>
+
+            <!-- drawn rects -->
+            <g id="rects-group">
+                <rect mask="url($masked)" v-for="(rect, key) in rects" v-bind:class="'element object-rect' + (activeElement == rect ? ' active' : '')" v-bind:x="getVal(rect.x)" v-bind:y="getVal(rect.y)" v-bind:width="getDist(rect.w)" v-bind:height="getDist(rect.h)" v-on:click="rectClick(key)"/>
+            </g>
+
+            <!-- drawn circles-->
+            <g id="circles-group">
+                <circle v-for="(circle, key) in circles" mask="url(#masked)"  v-bind:class="'element object-circle' + (activeElement == circle ? ' active' : '')" v-bind:cx="getVal(circle.x)" v-bind:cy="getVal(circle.y)" v-bind:r="getDist(circle.r)" v-on:click="circleClick(key)"></circle>
             </g>
 
 			<!-- texts -->
             <g id="texts-group">
-			<text v-for="(text, key) in texts" mask="url(#masked)" v-bind:class="'grid-text element ' + (activeElement == text ? ' active' : '')" v-bind:x="getVal(text.x)" v-bind:y="getVal(text.y)" v-on:click="textClick" data-type="text" v-bind:data-key="key" v-bind:style="'font-size: ' + textFontSize + 'px;'" dominant-baseline="middle" text-anchor="middle">{{ text.text }}</text>
+			    <text v-for="(text, key) in texts" mask="url(#masked)" v-bind:class="'grid-text element ' + (activeElement == text ? ' active' : '')" v-bind:x="getVal(text.x)" v-bind:y="getVal(text.y)" v-on:click="textClick(key)" data-type="text" v-bind:data-key="key" v-bind:style="'font-size: ' + textFontSize + 'px;'" dominant-baseline="middle" text-anchor="middle">{{ text.text }}</text>
             </g>
 
             <!-- characters -->
             <g id="characters-group">
-			<circle v-for="(char, key) in characters" mask="url(#masked)"  v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:tooltip="char.name" v-bind:cx="getVal(char.tile.x) + gridSize/2" v-bind:cy="getVal(char.tile.y) + gridSize/2" v-bind:r="gridSize * 0.4" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)" v-on:mouseover="tooltipMouseOver" v-on:mouseout="tooltipMouseOut" ></circle>
-			<text class="character-initials select-none" mask="url(#masked)" v-for="(char, key) in characters" v-bind:x="getVal(char.tile.x) + gridSize/2" v-bind:y="getVal(char.tile.y) + gridSize/2" text-anchor="middle" dominant-baseline="middle" v-bind:style="'font-size: ' + characterFontSize + 'px;'">{{ char.initials }}</text>
+			    <circle v-for="(char, key) in characters" mask="url(#masked)"  v-bind:class="'character' + (activeElement == char ? ' active' : '')" v-bind:tooltip="char.name" v-bind:cx="getVal(char.tile.x) + gridSize/2" v-bind:cy="getVal(char.tile.y) + gridSize/2" v-bind:r="gridSize * 0.4" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" v-on:click="characterClick(key)" v-on:mouseover="tooltipMouseOver" v-on:mouseout="tooltipMouseOut" ></circle>
+			    <text class="character-initials select-none" mask="url(#masked)" v-for="(char, key) in characters" v-bind:x="getVal(char.tile.x) + gridSize/2" v-bind:y="getVal(char.tile.y) + gridSize/2" text-anchor="middle" dominant-baseline="middle" v-bind:style="'font-size: ' + characterFontSize + 'px;'">{{ char.initials }}</text>
             </g>
 
             <!-- game master mask drawing box -->
-            <rect v-if="role=='gm' && drawType=='masks' && activePoint" v-bind:x="getVal(maskDrawRect.x)" v-bind:y="getVal(maskDrawRect.y)" v-bind:width="getDist(maskDrawRect.w)" v-bind:height="getDist(maskDrawRect.h)" fill="rgba(255,0,0,.5)" stroke="#f00"></rect>
-
+            <g id="sketches-group" v-if="role=='gm'">
+            <rect v-if="drawType=='masks' && activePoint" class="sketch sketch-stroke-red sketch-fill-red" v-bind:x="getVal(sketchMask.x)" v-bind:y="getVal(sketchMask.y)" v-bind:width="getDist(sketchMask.w)" v-bind:height="getDist(sketchMask.h)"></rect>
+            <rect v-if="drawType=='rects' && activePoint" class="sketch sketch-stroke-blue sketch-fill-blue" v-bind:x="getVal(sketchRect.x)" v-bind:y="getVal(sketchRect.y)" v-bind:width="getDist(sketchRect.w)" v-bind:height="getDist(sketchRect.h)"></rect>
+            <circle v-if="drawType=='circles' && activePoint" class="sketch sketch-stroke-blue sketch-fill-blue" v-bind:cx="getVal(sketchCircle.x)" v-bind:cy="getVal(sketchCircle.y)" v-bind:r="getDist(sketchCircle.r)"></circle>
+            <polyline  v-if="drawType=='lines' && activePoint" class="sketch sketch-stroke-blue" v-bind:points="getLinePoints(sketchLine)" />
+            <text v-if="drawType=='text' && sketchText.text" class="sketch sketch-text sketch-fill-blue" v-bind:x="getVal(sketchText.x)" v-bind:y="getVal(sketchText.y)"  v-bind:style="'font-size: ' + textFontSize + 'px;'" dominant-baseline="middle" text-anchor="middle">{{ sketchText.text }}</text>
+            </g>
             <!-- game master masks -->
             <g id="masks-group">
-                <rect v-if="role=='gm' && masksShow" v-for="(mask, key) in masks" v-bind:class="'gm-mask-rect' + (activeElement == mask ? ' active' : '')" v-bind:x="getVal(mask.x)-4" v-bind:y="getVal(mask.y)-4" v-bind:width="getDist(mask.width)+8" v-bind:height="getDist(mask.height)+8" fill="rgba(100,0,0,.6)" v-on:click="maskClick(key)"></rect>
+                <rect v-if="role=='gm' && masksShow" v-for="(mask, key) in masks" v-bind:class="'gm-mask-rect' + (activeElement == mask ? ' active' : '')" v-bind:x="getVal(mask.x)-4" v-bind:y="getVal(mask.y)-4" v-bind:width="getDist(mask.w)+8" v-bind:height="getDist(mask.h)+8" fill="rgba(100,0,0,.6)" v-on:click="maskClick(key)"></rect>
             </g>
 
             <!-- grid points -->
             <g id="points-group">
-                <rect v-show="pointsActive" v-for="(point, key) in points" v-bind:class="'grid-point' + (activePoint == point ? ' active' : '')" v-bind:x="getVal(point.x) - point.r" v-bind:y="getVal(point.y) - point.r" v-bind:width="point.r*2" v-bind:height="point.r*2" v-on:click="pointClick(key)" v-on:mouseover="pointMouse(key)"/>
+                <rect v-show="pointsActive" v-for="(point, key) in points" v-bind:class="'grid-point' + (activePoint == point ? ' active' : '') + (drawType=='text' ? ' no-hover' : '')" v-bind:x="getVal(point.x) - point.r" v-bind:y="getVal(point.y) - point.r" v-bind:width="point.r*2" v-bind:height="point.r*2" v-on:click="pointClick(key)" v-on:mouseover="pointMouse(key)"/>
             </g>
         </svg>
         </div>
 	</div><!-- canvas -->
-
+<!--    <div id="object-options" class="z-30 absolute" v-bind:style="">-->
+<!--        <div class="btn" title="Move"><i class="fas fa-arrows-alt"></i></div>-->
+<!--    </div>-->
 	<!-- Menu -->
 	<transition name="fade">
 		<div id="menu" v-cloak v-if="menuShow" class="text-white rounded-bl-md px-2 py-6 fixed z-20 top-0 right-0 bg-blue-400 w-64 drop-shadow">
@@ -75,8 +93,11 @@
             </select>
             <hr />
             <div v-if="role=='gm'">
-			<div>Draw:</div>
-			<label for="draw-lines-btn" class="draw-label"><input type="checkbox" id="draw-lines-btn" v-model="draw.lines" v-on:change="drawBtnClick('lines')"/>Lines</label>
+
+    			<div>Draw:</div>
+                <div><label for="draw-lines-btn" class="draw-label"><input type="checkbox" id="draw-lines-btn" v-model="draw.lines" v-on:change="drawBtnClick('lines')"/>Lines</label></div>
+                <div><label for="draw-rects-btn"><input type="checkbox" id="draw-rects-btn" v-model="draw.rects" v-on:change="drawBtnClick('rects')"/>Rectangles</label></div>
+                <div><label for="draw-circles-btn"><input type="checkbox" id="draw-circles-btn" v-model="draw.circles" v-on:change="drawBtnClick('circles')"/>Circles</label></div>
 
 			<hr />
 
@@ -122,8 +143,6 @@
 			<div class="pb-0 text-right">
 				<i class="fa fa-info-circle text-2xl cursor-pointer" v-on:click="modalInfoShow=true"></i>
 			</div>
-			<!-- <label for="draw-boxes-btn"><input type="checkbox" id="draw-boxes-btn" v-model="draw.boxes" v-on:change="drawBtnClick('boxes')"/>Boxes</label> -->
-			<!-- <label for="draw-circles-btn"><input type="checkbox" id="draw-circles-btn" v-model="draw.circles" v-on:change="drawBtnClick('circles')"/>Circles</label> -->
 		</div>
 	</transition>
 	<div id="menu-button" v-if="enabled" v-on:click="menuShow=!menuShow" class="btn-blue px-0 w-10 fixed top-1 right-1 z-30">

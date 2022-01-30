@@ -1,87 +1,96 @@
-const vueApp = new Vue({
+const vueApp = Vue.createApp({
+// const vueApp = new Vue({
 	el: '#app',
-	data: {
-		style: 'normal',
-		role: 'player',
-		roles: {
-			'player': 'Player',
-			'gm': 'Game Master',
-		},
-		styles: {
-			normal: 'Normal',
-			fantasy: 'Fantasy',
-			scifi: 'Sci-Fi',
-		},
-		loading: false,
-		gameId: gameId,
-		enabled: false,
-		connected: false,
-		width: 5,
-		height: 5,
-		masksShow: true,
-		modalNameShow: false,
-		modalInfoShow: false,
-		name: '',
-		toastText: '',
-		toastTimeout: null,
-		toastError: '',
-		pointsActive: false,
-		tilesActive: false,
-		activePoint: null,
-		activeElement: null,
-		drawType: null,
-		draw: {
-			lines: false,
-			boxes: false,
-			circles: false,
-			character: false,
-			masks: false,
-		},
-		drawTextValue: '',
-		drawTextError: '',
-		drawCharacterName: '',
-		drawCharacterInitials: '',
-		drawCharacterColor: null,
-		drawCharacterError: null,
-		characterColors: [
-			{fill: '#ff9', stroke: '#bb5'},
-			{fill: 'rgb(255 209 153)', stroke: 'rgb(187 155 85)'},
-			{fill: 'rgb(255 162 153)', stroke: 'rgb(187 108 85)'},
-			{fill: '#ff99ca', stroke: '#bb5485'},
-			{fill: '#c099ff', stroke: '#7b54bb'},
-			{fill: '#99afff', stroke: '#546abb'}, //227
-			{fill: '#99d1ff', stroke: 'hsl(207 43% 53% / 1)'}, // 207
-			{fill: '#99f3ff', stroke: 'hsl(187 43% 53% / 1)'},// 187
-			{fill: '#99ffc7', stroke: 'hsl(147 43% 53% / 1)'}, // 147
-			// {fill: '#ff9', stroke: '#bb5'},
-		],
-		menuShow: false,
-		canvas: null,
-		gridW: 0,
-		gridH: 0,
-		gridSize: 50,
-		marginCanvas: 20,
-		paddingOuterFactor: 0.5,
-		paddingTileFactor: 0.1,
-		textFontSize: 20,
-		characterFontSize: 20,
-		tooltipTarget: null,
-		tooltipLeft: 0,
-		tooltipTop: 0,
-		maskDrawRect: {x: 0, y: 0, h: 0, w: 0},
-		history: [],
-		// auto made
-		users: [],
-		grid: [],
-		tiles: [],
-		points: [],
-		// made by user
-		lines: [],
-		boxes: [],
-		circles: [],
-		characters: [],
-		texts: [],
-		masks: [],
+	data() {
+		return {
+			style: 'normal',
+			role: 'gm',
+			// role: 'player',
+			roles: {
+				'player': 'Player',
+				'gm': 'Game Master',
+			},
+			styles: {
+				normal: 'Normal',
+				fantasy: 'Fantasy',
+				scifi: 'Sci-Fi',
+			},
+			loading: false,
+			gameId: gameId,
+			enabled: false,
+			connected: false,
+			width: 5,
+			height: 5,
+			masksShow: true,
+			modalNameShow: false,
+			modalInfoShow: false,
+			name: '',
+			toastText: '',
+			toastTimeout: null,
+			toastError: '',
+			pointsActive: false,
+			tilesActive: false,
+			activePoint: null,
+			activeElement: null,
+			activePolyLine: null,
+			drawType: null,
+			draw: {
+				lines: false,
+				rects: false,
+				circles: false,
+				character: false,
+				masks: false,
+			},
+			drawTextValue: '',
+			drawTextError: '',
+			drawCharacterName: '',
+			drawCharacterInitials: '',
+			drawCharacterColor: null,
+			drawCharacterError: null,
+			characterColors: [
+				{fill: '#ff9', stroke: '#bb5'},
+				{fill: 'rgb(255 209 153)', stroke: 'rgb(187 155 85)'},
+				{fill: 'rgb(255 162 153)', stroke: 'rgb(187 108 85)'},
+				{fill: '#ff99ca', stroke: '#bb5485'},
+				{fill: '#c099ff', stroke: '#7b54bb'},
+				{fill: '#99afff', stroke: '#546abb'}, //227
+				{fill: '#99d1ff', stroke: 'hsl(207 43% 53% / 1)'}, // 207
+				{fill: '#99f3ff', stroke: 'hsl(187 43% 53% / 1)'},// 187
+				{fill: '#99ffc7', stroke: 'hsl(147 43% 53% / 1)'}, // 147
+				// {fill: '#ff9', stroke: '#bb5'},
+			],
+			menuShow: false,
+			canvas: null,
+			gridW: 0,
+			gridH: 0,
+			gridSize: 50,
+			marginCanvas: 20,
+			paddingOuterFactor: 0.5,
+			paddingTileFactor: 0.1,
+			textFontSize: 20,
+			characterFontSize: 20,
+			tooltipTarget: null,
+			tooltipLeft: 0,
+			tooltipTop: 0,
+			sketchMask: {x: 0, y: 0, h: 0, w: 0},
+			sketchRect: {x: 0, y: 0, h: 0, w: 0},
+			sketchCircle: {x: 0, y: 0, r: 0},
+			sketchLine: {x1: 0, y1: 0, x2: 0, y2: 0},
+			sketchText: {x: 0, y: 0, text: ''},
+			history: [],
+			// auto made
+			users: [],
+			grid: [],
+			tiles: [],
+			points: [],
+			// made by user
+			lines: [],
+			rects: [],
+			circles: [],
+			characters: [],
+			texts: [],
+			masks: [],
+		};
 	},
 	methods: {
 		pointClick(index) {
@@ -95,7 +104,14 @@ const vueApp = new Vue({
 			switch(this.drawType) {
 				case 'lines':
 					if (this.activePoint && this.activePoint != point) {
-						this.addLine(this.activePoint, point);
+						if (!this.activePolyLine) {
+							this.activePolyLine = this.getLine(this.activePoint, point, 'line');
+							this.addElement(this.lines, this.activePolyLine);
+						} else {
+							this.activePolyLine.p.push({x: point.x, y: point.y});
+							this.updateElement(this.activePolyLine);
+						}
+						// this.addElement(this.lines, this.getLine(this.activePoint, point, 'line'));
 						this.activePoint = point;
 						nothingHappened = false;
 					}
@@ -105,16 +121,27 @@ const vueApp = new Vue({
 						this.menuError = 'Text required before placing.';
 						return;
 					}
-					this.addElement(this.texts, {t:'text', x: point.x, y: point.y, text: this.drawTextValue});
+					this.addElement(this.texts, this.getText(point, this.drawTextValue, 'text'));
 					nothingHappened = false;
 					break;
 				case 'masks':
 					if (this.activePoint && this.activePoint != point) {
-						const x = Math.min(point.x, this.activePoint.x);
-						const y = Math.min(point.y, this.activePoint.y);
-						const w = Math.abs(point.x - this.activePoint.x);
-						const h = Math.abs(point.y - this.activePoint.y);
-						this.addElement(this.masks, {t:'mask', x: x, y: y, width: w, height: h });
+						this.addElement(this.masks, this.getRect(this.activePoint, point, 'mask'));
+						console.log('masks', this.masks[this.masks.length-1]);
+						this.activePoint = null;
+						nothingHappened = false;
+					}
+					break;
+				case 'rects':
+					if (this.activePoint && this.activePoint != point) {
+						this.addElement(this.rects, this.getRect(this.activePoint, point, 'rect'));
+						this.activePoint = null;
+						nothingHappened = false;
+					}
+					break;
+				case 'circles':
+					if (this.activePoint && this.activePoint != point) {
+						this.addElement(this.circles, this.getCircle(this.activePoint, point, 'circle'));
 						this.activePoint = null;
 						nothingHappened = false;
 					}
@@ -123,6 +150,7 @@ const vueApp = new Vue({
 			if (nothingHappened) {
 				if (this.activePoint) {
 					this.activePoint = null;
+					this.activePolyLine = null;
 				} else {
 					this.activePoint = point;
 				}
@@ -134,15 +162,36 @@ const vueApp = new Vue({
 				console.warn('point not found', index);
 				return;
 			}
-			if (this.drawType == 'masks') {
-				if (this.activePoint) {
-					this.maskDrawRect = {
-						x: Math.min(point.x, this.activePoint.x),
-						y: Math.min(point.y, this.activePoint.y),
-						w: Math.abs(point.x - this.activePoint.x),
-						h: Math.abs(point.y - this.activePoint.y),
-					};
-				}
+			switch(this.drawType) {
+				case 'masks':
+					if (this.activePoint) {
+						this.sketchMask = this.getRect(this.activePoint, point);
+					}
+					break;
+				case 'lines':
+					if (this.activePoint) {
+						this.sketchLine = this.getLine(this.activePoint, point);
+					}
+					break;
+				case 'rects':
+					if (this.activePoint) {
+						this.sketchRect = this.getRect(this.activePoint, point);
+					}
+					break;
+				case 'circles':
+					if (this.activePoint) {
+						this.sketchCircle = this.getCircle(this.activePoint, point);
+					}
+					break;
+				case 'text':
+					if (!this.drawTextValue) {
+						this.menuError = 'Text required before placing.';
+						return;
+					}
+					this.sketchText = this.getText(point, this.drawTextValue);
+					break;
+				default:
+					break;
 			}
 		},
 		tileClick(index) {
@@ -169,7 +218,8 @@ const vueApp = new Vue({
 			}
 			else if (this.activeElement && this.activeElement.t == 'character') {
 				this.activeElement.tile = tile;
-				Websocket.send({cmd: 'update', elem: this.activeElement});
+				this.updateElement(this.activeElement);
+				// Websocket.send({cmd: 'update', elem: this.activeElement});
 				this.activeElement = null;
 				this.tilesActive = false;
 			}
@@ -182,16 +232,19 @@ const vueApp = new Vue({
 			}
 
 		},
-		textClick(event) {
-			const index = parseInt(event.target.getAttribute('data-key'));
+		textClick(index) {
+			const text = this.texts[index];
+			if (!text) {
+				console.warn('text not found', index);
+				return;
+			}
 			this.tilesActive = false;
 			this.pointsActive = false;
 			this.activePoint = null;
-			if (this.activeElement != this.texts[index])
-				this.activeElement = this.texts[index];
+			if (this.activeElement != text)
+				this.activeElement = text;
 			else
 				this.activeElement = null;
-			// console.log(event, event.target.getAttribute('data-type'), event.target.getAttribute('data-key'));
 		},
 		lineClick(index) {
 			const line = this.lines[index];
@@ -200,11 +253,32 @@ const vueApp = new Vue({
 				return;
 			}
 			this.activePoint = null;
-			// if (this.activePoint && this.activePoint != point) {
-			// this.addLine(this.activePoint, point);
-			// }
 			if (this.activeElement != line)
 				this.activeElement = line;
+			else
+				this.activeElement = null;
+		},
+		rectClick(index) {
+			const rect = this.rects[index];
+			if (!rect) {
+				console.warn('rect not found', index);
+				return;
+			}
+			this.activePoint = null;
+			if (this.activeElement != rect)
+				this.activeElement = rect;
+			else
+				this.activeElement = null;
+		},
+		circleClick(index) {
+			const circle = this.circles[index];
+			if (!circle) {
+				console.warn('circle not found', index);
+				return;
+			}
+			this.activePoint = null;
+			if (this.activeElement != circle)
+				this.activeElement = circle;
 			else
 				this.activeElement = null;
 		},
@@ -263,22 +337,26 @@ const vueApp = new Vue({
 		},
 		drawBtnClick(type) {
 			for (let key of Object.keys(this.draw)) {
-				if (key !== type) this.$set(this.draw, key, false);
+				if (key !== type) {
+					this.draw[key] = false;
+					// this.$set(this.draw, key, false);
+				}
 			}
 			this.maskStartPoint = null;
 			this.tilesActive = false;
 			this.pointsActive = false;
 			this.activePoint = null;
+			this.resetSketches();
 			if (this.draw[type]) {
 				this.drawType = type;
 				switch (type) {
 					case 'lines':
-					case 'boxes':
+					case 'rects':
 					case 'circles':
 					case 'masks':
+					case 'text':
 						this.pointsActive = true;
 						break;
-					case 'text':
 					case 'character':
 						this.tilesActive = true;
 						break;
@@ -286,9 +364,6 @@ const vueApp = new Vue({
 			} else {
 				this.drawType = null;
 			}
-		},
-		addLine(p1, p2) {
-			this.addElement(this.lines, {t:'line', x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y});
 		},
 		characterNameKeyUp() {
 			if (this.drawCharacterName) {
@@ -311,6 +386,21 @@ const vueApp = new Vue({
 		getDist(val) {
 			return val * this.gridSize;
 		},
+		getLinePoints(line) {
+			const points = [];
+			if (line.x1) {
+				points.push(`${this.getVal(line.x1)},${this.getVal(line.y1)}`);
+				points.push(`${this.getVal(line.x2)},${this.getVal(line.y2)}`);
+			} else if (line.p) {
+				line.p.forEach(p => {
+					points.push(`${this.getVal(p.x)},${this.getVal(p.y)}`);
+				});
+			}
+			return points.join(' ');
+		},
+		getPoint(x, y) {
+			return this.points.find(p => p.x == x && p.y == y) || null;
+		},
 		initGrid(width, height) {
 			this.width = width;
 			this.height = height;
@@ -319,7 +409,7 @@ const vueApp = new Vue({
 			const canvasW = canvas.offsetWidth;
 			const tileSizeH = Math.floor((canvasH - this.marginCanvas * 2) / (this.height + 2 * this.paddingOuterFactor));
 			const tileSizeW = Math.floor((canvasW - this.marginCanvas * 2) / (this.width + 2 * this.paddingOuterFactor));
-			console.log('zzzzzz',this.height, this.width, canvasW, canvasH, tileSizeW, tileSizeH);
+			// console.log('zzzzzz',this.height, this.width, canvasW, canvasH, tileSizeW, tileSizeH);
 			this.gridSize = Math.min(tileSizeH, tileSizeW);
 			this.textFontSize = this.gridSize;
 			this.characterFontSize = Math.floor(this.gridSize / 2);
@@ -337,22 +427,23 @@ const vueApp = new Vue({
 			for (let w=0; w<=this.width; w++) {
 				grid.push({t: 'grid', x1: w, x2: w, y1: -1 * this.paddingOuterFactor, y2: this.gridH})
 			}
-			this.$set(this, 'grid', grid);
+			// this.$set(this, 'grid', grid);
+			this.grid = grid;
 		},
 		createGridPoints() {
 			const pointRadius = 5;
 			let pointsPerTile = 4;
 			const tiles = this.width * this.height;
-			if (tiles > 1100) pointsPerTile = 1;
-			else if (tiles > 600) pointsPerTile = 2;
+			if (tiles > 1600) pointsPerTile = 1;
+			else if (tiles > 800) pointsPerTile = 2;
 			const points = [];
 			for (let h=0; h<=this.height; h+=1/pointsPerTile) {
 				for (let w=0; w<=this.width; w+=1/pointsPerTile) {
 					points.push({t: 'point', x: w, y: h, r: pointRadius})
 				}
 			}
-			this.$set(this, 'points', points);
-			// this.points = points;
+			// this.$set(this, 'points', points);
+			this.points = points;
 		},
 		createGridTiles() {
 			const tiles = [];
@@ -361,7 +452,8 @@ const vueApp = new Vue({
 					tiles.push({t: 'tile', x: w, y: h})
 				}
 			}
-			this.$set(this, 'tiles', tiles);
+			// this.$set(this, 'tiles', tiles);
+			this.tiles = tiles;
 		},
 		historyAdd(elem) {
 			this.history.push({action: 'add', elem: elem});
@@ -374,14 +466,23 @@ const vueApp = new Vue({
 			if (!action) return;
 			const list = this.getElementArray(action.elem);
 			if (!list) return;
-			this.activeElement = null;
-			this.activePoint = null;
 			switch (action.action) {
 				case 'add':
 					// @todo missing id on the history elements
-					this.removeElement(list, action.elem, false);
+					if (action.elem.t == 'line' && action.elem.p.length > 2) {
+						action.elem.p.pop();
+						const lastPoint = action.elem.p[action.elem.p.length - 1];
+						this.activePoint = this.getPoint(lastPoint.x, lastPoint.y);
+						this.updateElement(action.elem);
+						this.history.push(action); // re-add
+					} else {
+						this.activePoint = null;
+						this.removeElement(list, action.elem, false);
+					}
 					break;
 				case 'delete':
+					this.activeElement = null;
+					this.activePoint = null;
 					// @todo missing id on the history elements
 					this.addElement(list, action.elem, false);
 					// list.push(action.elem);
@@ -400,7 +501,7 @@ const vueApp = new Vue({
 				case 'text': return this.texts;
 				case 'character': return this.characters;
 				case 'circle': return this.circles;
-				case 'box': return this.boxes;
+				case 'rect': return this.rects;
 				case 'mask': return this.masks;
 			}
 			return null;
@@ -410,6 +511,9 @@ const vueApp = new Vue({
 			if (history) this.historyAdd(elem);
 			Websocket.send({cmd: 'add', elem: elem});
 		},
+		updateElement(elem) {
+			Websocket.send({cmd: 'update', elem: elem});
+		},
 		removeElement(list, elem, history=true) {
 			list.splice(0, list.length, ...list.filter(e => e != elem));
 			if (history) this.historyDelete(elem);
@@ -418,7 +522,7 @@ const vueApp = new Vue({
 		clearElements() {
 			// @todo history
 			this.lines.splice(0, this.lines.length);
-			this.boxes.splice(0, this.boxes.length);
+			this.rects.splice(0, this.rects.length);
 			this.texts.splice(0, this.texts.length);
 			this.circles.splice(0, this.circles.length);
 			// @todo server
@@ -431,13 +535,12 @@ const vueApp = new Vue({
 			// Websocket.send({cmd: 'clear-characters'});
 		},
 		setElements(elements) {
-			console.log('set elements', elements);
 			if (!elements) return;
 			let elem;
 			const lines = [];
 			const characters = [];
 			const texts = [];
-			const boxes = [];
+			const rects = [];
 			const circles = [];
 			const masks = [];
 			for (elem of elements) {
@@ -445,18 +548,24 @@ const vueApp = new Vue({
 					case 'line': lines.push(elem); break;
 					case 'character': characters.push(elem); break;
 					case 'text': texts.push(elem); break;
-					case 'box': boxes.push(elem); break;
+					case 'rect': rects.push(elem); break;
 					case 'circle': circles.push(elem); break;
 					case 'mask': masks.push(elem); break;
 				}
 			}
-			this.lines.splice(0, this.lines.length, ...lines);
-			this.characters.splice(0, this.characters.length, ...characters);
-			this.texts.splice(0, this.texts.length, ...texts);
-			this.boxes.splice(0, this.boxes.length, ...boxes);
-			this.circles.splice(0, this.circles.length, ...circles);
-			this.masks.splice(0, this.masks.length, ...masks);
-			// set history? or should it only be yours
+			// performance: check diff? should it be a hash check instead?
+			if (!this.arrayEqual(this.lines, lines))
+				this.lines.splice(0, this.lines.length, ...lines);
+			if (this.characters != characters)
+				this.characters.splice(0, this.characters.length, ...characters);
+			if (this.texts != texts)
+				this.texts.splice(0, this.texts.length, ...texts);
+			if (this.rects != rects)
+				this.rects.splice(0, this.rects.length, ...rects);
+			if (this.circles != circles)
+				this.circles.splice(0, this.circles.length, ...circles);
+			if (this.masks != masks)
+				this.masks.splice(0, this.masks.length, ...masks);
 		},
 		onOpen() {
 			Websocket.send({cmd:'join', gameId: this.gameId});
@@ -466,7 +575,7 @@ const vueApp = new Vue({
 			this.toastError = 'Disconnected!';
 		},
 		onMessage(msg) {
-			console.log('message', msg);
+			// console.log('message', msg);
 			if (msg.fail) this.onFail(msg);
 			else {
 				switch(msg.action) {
@@ -555,16 +664,61 @@ const vueApp = new Vue({
 				tile: this.tiles[173],
 				color: this.characterColors[3],
 			});
-			this.addElement(this.texts, {x: 40, y: 40, text: 'Fissi', t: 'text'});
+			this.addElement(this.texts, {x: 5, y: 5, text: 'Fissi', t: 'text'});
 		},
 		connect() {
 			Websocket.connect({
-				debug: true,
+				debug: false,
 				autoReconnect: true,
 				onopen: () => {this.onOpen();},
 				onclose: () => {this.onClose();},
 				onmessage: (message) => {this.onMessage(message);},
 			});
+		},
+		resetSketches() {
+			const zero = {x: 0, y: 0};
+			this.sketchText = this.getText(zero, '');
+			this.sketchLine = this.getLine(zero, zero);
+			this.sketchRect =  this.getRect(zero, zero);
+			this.sketchCircle = this.getCircle(zero, zero);
+		},
+		getRect(point1, point2, name) {
+			return {
+				t: name,
+				x: Math.min(point2.x, point1.x),
+				y: Math.min(point2.y, point1.y),
+				w: Math.abs(point2.x - point1.x),
+				h: Math.abs(point2.y - point1.y),
+			};
+		},
+		getCircle(point1, point2, name) {
+			return {
+				t: name,
+				x: Math.min(point1.x, point2.x),
+				y: Math.min(point1.y, point2.y),
+				r: Math.sqrt(Math.pow(point1.x - point2.x, 2) + Math.pow(point1.y - point2.y, 2)),
+			};
+		},
+		getLine(point1, point2, name) {
+			return {
+				t: name,
+				p: [{x: point1.x, y: point1.y}, {x: point2.x, y: point2.y}],
+				// x1: point1.x,
+				// y1: point1.y,
+				// x2: point2.x,
+				// y2: point2.y,
+			};
+		},
+		getText(point, text, name) {
+			return {t:name,
+				x: point.x,
+				y: point.y,
+				text: text,
+			};
+		},
+		arrayEqual(arr1, arr2) {
+			// this is not a perfect way of doing it, but it will suffice
+			return JSON.stringify(arr1) === JSON.stringify(arr2);
 		},
 	},
 	mounted() {
@@ -586,6 +740,12 @@ const vueApp = new Vue({
 							case 'text':
 								this.removeElement(this.texts, this.activeElement);
 								break;
+							case 'rect':
+								this.removeElement(this.rects, this.activeElement);
+								break;
+							case 'circle':
+								this.removeElement(this.circles, this.activeElement);
+								break;
 							case 'character':
 								this.removeElement(this.characters, this.activeElement);
 								break;
@@ -598,6 +758,7 @@ const vueApp = new Vue({
 				case 'Escape': // escape
 					if (this.activePoint) {
 						this.activePoint = null;
+						this.activePolyLine = null;
 					} else if(this.activeElement) {
 						this.activeElement = null;
 					} else {
@@ -618,3 +779,4 @@ const vueApp = new Vue({
 		},
 	},
 });
+vueApp.mount('#app');

@@ -48,7 +48,7 @@ class Game {
 		} catch(e) {
 			return null;
 		}
-		console.log('data', json);
+		// console.log('data', json);
 		if (json) {
 			const data = JSON.parse(json);
 			if (logger.isDebugEnabled) logger.debug('Loading From backup ' + path.basename(file));

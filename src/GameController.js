@@ -97,9 +97,9 @@ class GameController {
 	 * @returns {string}
 	 */
 	getNewId() {
-		let id = this.generateId(6);
+		let id = this.generateId(7);
 		while (this.find(id)) {
-			id = this.generateId(6);
+			id = this.generateId(7);
 		}
 		return id;
 	}
@@ -110,7 +110,7 @@ class GameController {
 	 * @return {string}
 	 */
 	generateId(length) {
-		const chars = 'abcdefghijkmnpqrstuwvxyz23456789';
+		const chars = 'abcdefghijklmnopqrstuvwxyz1234567890';
 		let id = '';
 		for (let i = 0; i < length; i++ ) {
 			id += chars.charAt(Random.randomInt0toX(chars.length - 1));

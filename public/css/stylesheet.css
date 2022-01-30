@@ -79,6 +79,27 @@ html, body {
 .role-gm .grid-point:hover {
     stroke: blue;
 }
+.sketch {
+    stroke-width: 2px;
+    stroke: #000;
+    fill: rgba(0,0,0,.5);
+}
+.sketch-text {
+    stroke-width: 0;
+    font-weight: bold;
+}
+.sketch-stroke-blue {
+    stroke: #0000ff;
+}
+.sketch-fill-blue {
+    fill: rgba(0,0,255,.5);
+}
+.sketch-stroke-red {
+    stroke: #ff0000;
+}
+.sketch-fill-red {
+    fill: rgba(255,0,0,.5);
+}
 .grid-point.active {
     fill: blue;
 }
@@ -101,6 +122,13 @@ html, body {
 .grid-line {
     stroke-width: 4px;
     stroke: #000;
+    fill: none;
+}
+.object-circle,
+.object-rect {
+    stroke-width: 4px;
+    stroke: #000;
+    fill: none;
 }
 .grid-text {
     font-size: 20px;
@@ -110,9 +138,6 @@ html, body {
 }
 .role-gm .grid-text:hover {
     fill: #00f;
-}
-.grid-text.active {
-    fill: #f00;
 }
 .character {
     stroke-width: 4px;
@@ -194,10 +219,10 @@ input[type=text] {
 .style-fantasy .grid-text {
     fill: #604a3f;
 }
-.role-gm .style-fantasy .grid-text:hover {
+.role-gm.style-fantasy .grid-text:hover {
     fill: #b39b39;
 }
-.role-gm .style-fantasy .grid-text.active {
+.role-gm.style-fantasy .grid-text.active {
     fill: #f00;
 }
 
@@ -220,20 +245,20 @@ input[type=text] {
     color: #fff;
 }
 
-.role-gm .style-scifi .grid-point:hover {
+.role-gm.style-scifi .grid-point:hover {
     stroke: #00ffff;
 }
-.role-gm .style-scifi .grid-point.active {
+.role-gm.style-scifi .grid-point.active {
     fill: #00ffff;
 }
 
 .style-scifi .grid-tile:hover {
     fill: rgb(61 186 218 / 20%);
 }
-.role-gm .style-scifi .grid-text:hover {
+.role-gm.style-scifi .grid-text:hover {
     fill: #0ff;
 }
-.role-gm .style-scifi .grid-text.active {
+.role-gm.style-scifi .grid-text.active {
     fill: #f00;
 }
 
@@ -251,6 +276,9 @@ input[type=text] {
 .role-player .grid-text
 {
     cursor: default;
+}
+.role-gm .grid-point.no-hover {
+    stroke: none;
 }
 #metal {
     border-radius: 0.2rem;

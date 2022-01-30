@@ -1,9 +1,11 @@
-new Vue({
+const app = Vue.createApp({
 	el: '#app',
-	data: {
-		gameId: '',
-		width: 16,
-		height: 12,
+	data() {
+		return {
+			gameId: '',
+				width: 16,
+			height: 12,
+		};
 	},
 	methods: {
 		async create() {
@@ -26,3 +28,4 @@ new Vue({
 
 	},
 });
+app.mount('#app');
