@@ -4,8 +4,8 @@ const vueApp = Vue.createApp({
 	data() {
 		return {
 			style: 'normal',
-			role: 'gm',
-			// role: 'player',
+			// role: 'gm',
+			role: 'player',
 			roles: {
 				'player': 'Player',
 				'gm': 'Game Master',
@@ -33,6 +33,7 @@ const vueApp = Vue.createApp({
 			activePoint: null,
 			activeElement: null,
 			activePolyLine: null,
+			moveElement: null,
 			drawType: null,
 			draw: {
 				lines: false,
@@ -77,6 +78,7 @@ const vueApp = Vue.createApp({
 			sketchCircle: {x: 0, y: 0, r: 0},
 			sketchLine: {x1: 0, y1: 0, x2: 0, y2: 0},
 			sketchText: {x: 0, y: 0, text: ''},
+			objectOptions: {},
 			history: [],
 			// auto made
 			users: [],
@@ -97,6 +99,10 @@ const vueApp = Vue.createApp({
 			const point = this.points[index];
 			if (!point) {
 				console.warn('point not found', index);
+				return;
+			}
+			if (this.moveElement) {
+				this.endMove();
 				return;
 			}
 			this.activeElement = null;
@@ -127,7 +133,6 @@ const vueApp = Vue.createApp({
 				case 'masks':
 					if (this.activePoint && this.activePoint != point) {
 						this.addElement(this.masks, this.getRect(this.activePoint, point, 'mask'));
-						console.log('masks', this.masks[this.masks.length-1]);
 						this.activePoint = null;
 						nothingHappened = false;
 					}
@@ -161,6 +166,9 @@ const vueApp = Vue.createApp({
 			if (!point) {
 				console.warn('point not found', index);
 				return;
+			}
+			if (this.moveElement) {
+				this.shiftElement(this.moveElement, point);
 			}
 			switch(this.drawType) {
 				case 'masks':
@@ -720,6 +728,54 @@ const vueApp = Vue.createApp({
 			// this is not a perfect way of doing it, but it will suffice
 			return JSON.stringify(arr1) === JSON.stringify(arr2);
 		},
+		optionsBtnMoveClick() {
+			this.pointsActive = true;
+			this.moveElement = this.activeElement;
+		},
+		endMove() {
+			const elem = this.moveElement;
+			this.pointsActive = false;
+			this.moveElement = null;
+			this.activeElement = null;
+			this.updateElement(elem);
+		},
+		shiftElement(elem, point) {
+			switch(elem.t) {
+				case 'line':
+					let dx, dy;
+					if (elem.p) { // points
+						let topP;
+						elem.p.forEach(p => {
+							if (!topP || p.y < topP.y) {
+								topP = p;
+							}
+						});
+						dx = point.x - topP.x;
+						dy = point.y - topP.y;
+						elem.p.forEach(p => {
+							p.x += dx;
+							p.y += dy;
+						});
+					} else {
+						dx = point.x - elem.x1;
+						dy = point.y - elem.y1;
+						elem.x1 = point.x;
+						elem.y1 = point.y;
+						elem.x2 += dx;
+						elem.y2 += dy;
+					}
+					break;
+				case 'circle':
+				case 'rect':
+				case 'text':
+				case 'mask':
+					// const dx = point.x - elem.x;
+					// const dy = point.y - elem.y;
+					elem.x = point.x;
+					elem.y = point.y;
+					break;
+			}
+		},
 	},
 	mounted() {
 		this.name = localStorage.getItem('grid-player-name') || null;
@@ -756,6 +812,10 @@ const vueApp = Vue.createApp({
 						this.activeElement = null;
 					}
 				case 'Escape': // escape
+					if (this.moveElement) {
+						this.endMove();
+						return;
+					}
 					if (this.activePoint) {
 						this.activePoint = null;
 						this.activePolyLine = null;
@@ -776,6 +836,17 @@ const vueApp = Vue.createApp({
 	watch: {
 		style (val) {
 			localStorage.setItem('grid-style', val);
+		},
+		activeElement(val) {
+			if (val) {
+				const el = document.body.querySelector(`[data-object-id="${val.id}"]`);
+				if (el) {
+					const rect = el.getBoundingClientRect();
+					this.objectOptions.top = rect.top - 45;
+					this.objectOptions.left = rect.left;
+				}
+
+			}
 		},
 	},
 });
