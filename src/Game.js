@@ -44,7 +44,7 @@ class Game {
 		const file = path.join(paths.storage, 'backups', `backup-${id}.json`);
 		let json;
 		try {
-			json = await fs.readFile(file, "binary");
+			json = await fs.readFile(file, 'utf8');
 		} catch(e) {
 			return null;
 		}
@@ -142,11 +142,11 @@ class Game {
 			fs.readFile(file).then((data) => {
 				if (data != str) {// avoid nodemon restarting infinitely
 					if (logger.isDebugEnabled) logger.debug('Updating ' + path.basename(file));
-					fs.writeFile(file, str).catch((e) => {
+					fs.writeFile(file, str, 'utf8').catch((e) => {
 					});
 				}
 			}).catch((e) => {
-				fs.writeFile(file, str).catch((e) => {
+				fs.writeFile(file, str, 'utf8').catch((e) => {
 				});
 			});
 		} catch(e) {

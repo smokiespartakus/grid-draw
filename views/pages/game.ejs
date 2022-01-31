@@ -87,8 +87,12 @@
         </div>
 <!--        <div v-if="activeElement.t != 'mask'" class="btn ml-0.5" title="Hide for players"><i class="fas fa-eye-slash "></i></div>-->
         <div class="bg-gray-50 p-2 rounded text-center inline-block ml-0.5" v-if="activeElement.t == 'character'" v-on:click="">
+            <i class="fas fa-lightbulb" title="Initiative" style="color: #b2b41a"></i>&nbsp;
+            <input type="text" v-model="characterInitiativeEdit" class="text-gray-800 w-12" placeholder="Texty"/>
+        </div>
+        <div class="bg-gray-50 p-2 rounded text-center inline-block ml-0.5" v-if="activeElement.t == 'character'" v-on:click="">
             <i class="fas fa-tint" title="Damage" style="color:#600"></i>&nbsp;
-            <input type="text" v-model="characterDamageEdit" class="text-gray-800" placeholder="Texty"/>
+            <input type="text" v-model="characterDamageEdit" class="text-gray-800 w-12" placeholder="Texty"/>
         </div>
     </div>
     <!-- Players List -->
@@ -100,7 +104,8 @@
                 <text class="character-initials select-none" x="32" y="34" text-anchor="middle" dominant-baseline="middle" style="font-size: 30px">{{ char.initials }}</text>
                 </svg>
                 {{ char.name }}
-                <span v-if="char.dam > 0">(<i class="fas fa-tint" style="color: #600"></i>{{ char.dam || 0 }})</span>
+                <span v-if="char.init > 0" title="Initiative"><i class="fas fa-lightbulb" style="color: #b2b41a"></i>{{ char.init || 0 }}&nbsp;</span>
+                <span v-if="char.dam > 0"><i class="fas fa-tint" style="color: #600"></i>{{ char.dam || 0 }}</span>
             </div>
             <hr />
             <div v-for="char in characters.filter(ch => ch.cat=='monster' && ch.dam > 0)" class="pb-0.5">
@@ -108,7 +113,9 @@
                     <circle class="" cx="32" cy="32" r="30" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" stroke-width="4"></circle>
                     <text class="character-initials select-none" x="32" y="34" text-anchor="middle" dominant-baseline="middle" style="font-size: 30px">{{ char.initials }}</text>
                 </svg>
-                {{ char.name }} (<i class="fas fa-tint" style="color: #600"></i>{{ char.dam || 0 }})
+                {{ char.name }}
+                <span v-if="char.init > 0" title="Initiative"><i class="fas fa-lightbulb" style="color: #b2b41a"></i>{{ char.init || 0 }}&nbsp;</span>
+                <i class="fas fa-tint" style="color: #600"></i>{{ char.dam || 0 }}
             </div>
         </div>
     </transition>
@@ -296,6 +303,8 @@
     </filter>
 </svg>
 </div><!-- app 0-->
+<!-- tailwind text div -->
+<div class="none w-1 w-2 w-4 w-5 w-6 w-8 w-10 w-12 w-16"></div>
 <script type="text/javascript">
 const gameId = '<%= gameId %>';
 const data = <%= JSON.stringify(data) %>;

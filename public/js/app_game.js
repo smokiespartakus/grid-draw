@@ -32,6 +32,7 @@ const vueApp = Vue.createApp({
 			tilesActive: false,
 			activePoint: null,
 			activeElement: null,
+			activeElementEdited: false,
 			activePolyLine: null,
 			moveElement: null,
 			drawType: null,
@@ -50,6 +51,7 @@ const vueApp = Vue.createApp({
 			drawCharacterColor: null,
 			drawCharacterError: null,
 			characterDamageEdit: 0,
+			characterInitiativeEdit: 0,
 			textEdit: '',
 			characterColors: [
 				{fill: '#ff9', stroke: '#bb5'},
@@ -226,7 +228,8 @@ const vueApp = Vue.createApp({
 					name: this.drawCharacterName,
 					initials: this.drawCharacterInitials,
 					cat: this.drawCharacterCategory,
-					dam: 1, // damage
+					dam: 0, // damage
+					init: 0, // initiative
 					tile: tile,
 				});
 				// this.drawCharacterColor = null;
@@ -319,6 +322,7 @@ const vueApp = Vue.createApp({
 				this.activeElement = char;
 				this.tilesActive = true;
 				this.characterDamageEdit = char.dam || 0;
+				this.characterInitiativeEdit = char.init|| 0;
 			}
 		},
 		maskClick(index) {
@@ -854,7 +858,7 @@ const vueApp = Vue.createApp({
 		style (val) {
 			localStorage.setItem('grid-style', val);
 		},
-		activeElement(val) {
+		activeElement(val, before) {
 			if (val) {
 				const el = document.body.querySelector(`[data-object-id="${val.id}"]`);
 				if (el) {
@@ -862,17 +866,29 @@ const vueApp = Vue.createApp({
 					this.objectOptions.top = rect.top - 45;
 					this.objectOptions.left = rect.left;
 				}
-
+			} else if (before) {
+				if (this.activeElementEdited) {
+					this.activeElementEdited = false;
+					this.updateElement(before);
+				}
 			}
 		},
 		textEdit(val) {
 			if (this.activeElement && this.activeElement.t == 'text') {
 				this.activeElement.text = val;
+				this.activeElementEdited = true;
 			}
 		},
 		characterDamageEdit(val) {
 			if (this.activeElement && this.activeElement.t == 'character') {
 				this.activeElement.dam = val;
+				this.activeElementEdited = true;
+			}
+		},
+		characterInitiativeEdit(val) {
+			if (this.activeElement && this.activeElement.t == 'character') {
+				this.activeElement.init = val;
+				this.activeElementEdited = true;
 			}
 		},
 	},
