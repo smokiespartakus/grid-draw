@@ -79,7 +79,7 @@
         </div>
 	</div><!-- canvas -->
     <!-- options -->
-    <div v-if="activeElement && !moveElement" id="object-options" class="z-30 absolute" v-bind:style="`top:${objectOptions.top}px; left:${objectOptions.left}px;`">
+    <div v-if="activeElement && !moveElement" id="object-options" class="z-30 absolute" v-bind:style="`top:${objectOptions.top}; left:${objectOptions.left};`">
         <div class="btn" title="Move" v-if="activeElement.t != 'character'" v-on:click="optionsBtnMoveClick"><i class="fas fa-arrows-alt"></i></div>
         <div class="bg-gray-50 p-2 rounded text-center inline-block ml-0.5" v-if="activeElement.t == 'text'">
             <i class="fas fa-edit"></i>&nbsp;
@@ -87,7 +87,7 @@
         </div>
 <!--        <div v-if="activeElement.t != 'mask'" class="btn ml-0.5" title="Hide for players"><i class="fas fa-eye-slash "></i></div>-->
         <div class="bg-gray-50 p-2 rounded text-center inline-block ml-0.5" v-if="activeElement.t == 'character'" v-on:click="">
-            <i class="fas fa-lightbulb" title="Initiative" style="color: #b2b41a"></i>&nbsp;
+            <i class="fas fa-lightbulb" title="Initiative" style="color: #d2be2f"></i>&nbsp;
             <input type="text" v-model="characterInitiativeEdit" class="text-gray-800 w-12" placeholder="Texty"/>
         </div>
         <div class="bg-gray-50 p-2 rounded text-center inline-block ml-0.5" v-if="activeElement.t == 'character'" v-on:click="">
@@ -104,7 +104,7 @@
                 <text class="character-initials select-none" x="32" y="34" text-anchor="middle" dominant-baseline="middle" style="font-size: 30px">{{ char.initials }}</text>
                 </svg>
                 {{ char.name }}
-                <span v-if="char.init > 0" title="Initiative"><i class="fas fa-lightbulb" style="color: #b2b41a"></i>{{ char.init || 0 }}&nbsp;</span>
+                <span v-if="char.init > 0" title="Initiative"><i class="fas fa-lightbulb" style="color: #ffd475"></i>{{ char.init || 0 }}&nbsp;</span>
                 <span v-if="char.dam > 0"><i class="fas fa-tint" style="color: #600"></i>{{ char.dam || 0 }}</span>
             </div>
             <hr />
@@ -114,7 +114,7 @@
                     <text class="character-initials select-none" x="32" y="34" text-anchor="middle" dominant-baseline="middle" style="font-size: 30px">{{ char.initials }}</text>
                 </svg>
                 {{ char.name }}
-                <span v-if="char.init > 0" title="Initiative"><i class="fas fa-lightbulb" style="color: #b2b41a"></i>{{ char.init || 0 }}&nbsp;</span>
+                <span v-if="char.init > 0" title="Initiative"><i class="fas fa-lightbulb" style="color: #ffd475"></i>{{ char.init || 0 }}&nbsp;</span>
                 <i class="fas fa-tint" style="color: #600"></i>{{ char.dam || 0 }}
             </div>
         </div>

@@ -810,8 +810,8 @@ Ensure the default browser behavior of the `hidden` attribute.
   width: 100%;
 }
 
-.w-16 {
-  width: 4rem;
+.w-12 {
+  width: 3rem;
 }
 
 .w-64 {
@@ -846,8 +846,8 @@ Ensure the default browser behavior of the `hidden` attribute.
   width: 2rem;
 }
 
-.w-12 {
-  width: 3rem;
+.w-16 {
+  width: 4rem;
 }
 
 .max-w-xs {

@@ -4,8 +4,8 @@ const vueApp = Vue.createApp({
 	data() {
 		return {
 			style: 'normal',
-			role: 'gm',
-			// role: 'player',
+			// role: 'gm',
+			role: 'player',
 			roles: {
 				'player': 'Player',
 				'gm': 'Game Master',
@@ -106,10 +106,6 @@ const vueApp = Vue.createApp({
 			const point = this.points[index];
 			if (!point) {
 				console.warn('point not found', index);
-				return;
-			}
-			if (this.moveElement) {
-				this.endMove();
 				return;
 			}
 			this.activeElement = null;
@@ -833,10 +829,6 @@ const vueApp = Vue.createApp({
 						this.activeElement = null;
 					}
 				case 'Escape': // escape
-					if (this.moveElement) {
-						this.endMove();
-						return;
-					}
 					if (this.activePoint) {
 						this.activePoint = null;
 						this.activePolyLine = null;
@@ -860,13 +852,22 @@ const vueApp = Vue.createApp({
 		},
 		activeElement(val, before) {
 			if (val) {
-				const el = document.body.querySelector(`[data-object-id="${val.id}"]`);
-				if (el) {
-					const rect = el.getBoundingClientRect();
-					this.objectOptions.top = rect.top - 45;
-					this.objectOptions.left = rect.left;
+				if (val.t == 'character') {
+					this.objectOptions.top = '0.25rem';
+					this.objectOptions.left = '3rem';
+				} else {
+					const el = document.body.querySelector(`[data-object-id="${val.id}"]`);
+					if (el) {
+						const rect = el.getBoundingClientRect();
+						this.objectOptions.top = (rect.top - 60) + 'px';
+						this.objectOptions.left = (rect.left) + 'px';
+					}
 				}
 			} else if (before) {
+				if (this.moveElement) {
+					this.endMove();
+					return;
+				}
 				if (this.activeElementEdited) {
 					this.activeElementEdited = false;
 					this.updateElement(before);
