@@ -4,8 +4,8 @@ const vueApp = Vue.createApp({
 	data() {
 		return {
 			style: 'normal',
-			// role: 'gm',
-			role: 'player',
+			role: 'gm',
+			// role: 'player',
 			roles: {
 				'player': 'Player',
 				'gm': 'Game Master',
@@ -46,8 +46,11 @@ const vueApp = Vue.createApp({
 			drawTextError: '',
 			drawCharacterName: '',
 			drawCharacterInitials: '',
+			drawCharacterCategory: 'player',
 			drawCharacterColor: null,
 			drawCharacterError: null,
+			characterDamageEdit: 0,
+			textEdit: '',
 			characterColors: [
 				{fill: '#ff9', stroke: '#bb5'},
 				{fill: 'rgb(255 209 153)', stroke: 'rgb(187 155 85)'},
@@ -61,6 +64,7 @@ const vueApp = Vue.createApp({
 				// {fill: '#ff9', stroke: '#bb5'},
 			],
 			menuShow: false,
+			playersShow: false,
 			canvas: null,
 			gridW: 0,
 			gridH: 0,
@@ -96,6 +100,7 @@ const vueApp = Vue.createApp({
 	},
 	methods: {
 		pointClick(index) {
+			if (this.role !== 'gm') return;
 			const point = this.points[index];
 			if (!point) {
 				console.warn('point not found', index);
@@ -162,6 +167,7 @@ const vueApp = Vue.createApp({
 			}
 		},
 		pointMouse(index) {
+			if (this.role !== 'gm') return;
 			const point = this.points[index];
 			if (!point) {
 				console.warn('point not found', index);
@@ -209,6 +215,7 @@ const vueApp = Vue.createApp({
 				return;
 			}
 			if (this.draw.character) {
+				if (this.role !== 'gm') return;
 				if (!this.drawCharacterName || !this.drawCharacterInitials || !this.drawCharacterColor) {
 					this.drawCharacterError = 'Name, initials and Colour required.';
 					return;
@@ -218,6 +225,8 @@ const vueApp = Vue.createApp({
 					color: this.drawCharacterColor,
 					name: this.drawCharacterName,
 					initials: this.drawCharacterInitials,
+					cat: this.drawCharacterCategory,
+					dam: 1, // damage
 					tile: tile,
 				});
 				// this.drawCharacterColor = null;
@@ -241,6 +250,7 @@ const vueApp = Vue.createApp({
 
 		},
 		textClick(index) {
+			if (this.role !== 'gm') return;
 			const text = this.texts[index];
 			if (!text) {
 				console.warn('text not found', index);
@@ -249,12 +259,15 @@ const vueApp = Vue.createApp({
 			this.tilesActive = false;
 			this.pointsActive = false;
 			this.activePoint = null;
-			if (this.activeElement != text)
+			if (this.activeElement != text) {
 				this.activeElement = text;
+				this.textEdit = text.text;
+			}
 			else
 				this.activeElement = null;
 		},
 		lineClick(index) {
+			if (this.role !== 'gm') return;
 			const line = this.lines[index];
 			if (!line) {
 				console.warn('line not found', index);
@@ -267,6 +280,7 @@ const vueApp = Vue.createApp({
 				this.activeElement = null;
 		},
 		rectClick(index) {
+			if (this.role !== 'gm') return;
 			const rect = this.rects[index];
 			if (!rect) {
 				console.warn('rect not found', index);
@@ -279,6 +293,7 @@ const vueApp = Vue.createApp({
 				this.activeElement = null;
 		},
 		circleClick(index) {
+			if (this.role !== 'gm') return;
 			const circle = this.circles[index];
 			if (!circle) {
 				console.warn('circle not found', index);
@@ -303,9 +318,11 @@ const vueApp = Vue.createApp({
 			} else {
 				this.activeElement = char;
 				this.tilesActive = true;
+				this.characterDamageEdit = char.dam || 0;
 			}
 		},
 		maskClick(index) {
+			if (this.role !== 'gm') return;
 			const mask = this.masks[index];
 			if (!mask) {
 				console.warn('mask not found', index);
@@ -846,6 +863,16 @@ const vueApp = Vue.createApp({
 					this.objectOptions.left = rect.left;
 				}
 
+			}
+		},
+		textEdit(val) {
+			if (this.activeElement && this.activeElement.t == 'text') {
+				this.activeElement.text = val;
+			}
+		},
+		characterDamageEdit(val) {
+			if (this.activeElement && this.activeElement.t == 'character') {
+				this.activeElement.dam = val;
 			}
 		},
 	},

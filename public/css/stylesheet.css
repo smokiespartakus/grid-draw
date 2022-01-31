@@ -5,22 +5,6 @@ html, body {
     padding: 0;
     margin: 0;
 }
-.btn {
-    padding: 6px 10px;
-    cursor: pointer;
-    background: #dff;
-    box-shadow: 1px 1px 3px rgba(0,0,0,.6);
-    border-radius: 4px;
-    box-sizing: border-box;
-    text-align: center;
-    display: inline-block;
-    transition: all .2s;
-    /*border: 2px solid #a5dbdb;*/
-}
-.btn:hover, btn:active {
-    background: #81e0dd;
-    /*border: 2px solid #69b5b5;*/
-}
 [v-cloak] {
     display: none;
 }
@@ -29,7 +13,7 @@ html, body {
 }
 #menu-button {
 }
-#menu hr {
+.menu hr {
     margin: 10px;
     border:  none;
     border-top:  1px solid #3d759f;
@@ -148,6 +132,7 @@ html, body {
 }
 .character.active {
     stroke: #f00;
+    fill: #fff;
 }
 .character-initials {
     pointer-events: none;
@@ -156,7 +141,7 @@ html, body {
 .fade-enter-active {
     transition: opacity .3s;
 }
-.fade-enter,
+.fade-enter-from,
 .fade-leave-active {
     transition: opacity .3s;
     opacity: 0;

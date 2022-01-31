@@ -79,13 +79,46 @@
         </div>
 	</div><!-- canvas -->
     <!-- options -->
-    <div v-if="activeElement && !moveElement" id="object-options" class="z-30 absolute" v-bind:style="`top:${objectOptions.top}px; left:${objectOptions.left}px;`" v-on:click="optionsBtnMoveClick">
-        <div class="btn" title="Move"><i class="fas fa-arrows-alt"></i></div>
+    <div v-if="activeElement && !moveElement" id="object-options" class="z-30 absolute" v-bind:style="`top:${objectOptions.top}px; left:${objectOptions.left}px;`">
+        <div class="btn" title="Move" v-if="activeElement.t != 'character'" v-on:click="optionsBtnMoveClick"><i class="fas fa-arrows-alt"></i></div>
+        <div class="bg-gray-50 p-2 rounded text-center inline-block ml-0.5" v-if="activeElement.t == 'text'">
+            <i class="fas fa-edit"></i>&nbsp;
+            <input type="text" v-model="textEdit" class="text-gray-800" placeholder="Texty"/>
+        </div>
 <!--        <div v-if="activeElement.t != 'mask'" class="btn ml-0.5" title="Hide for players"><i class="fas fa-eye-slash "></i></div>-->
+        <div class="bg-gray-50 p-2 rounded text-center inline-block ml-0.5" v-if="activeElement.t == 'character'" v-on:click="">
+            <i class="fas fa-tint" title="Damage" style="color:#600"></i>&nbsp;
+            <input type="text" v-model="characterDamageEdit" class="text-gray-800" placeholder="Texty"/>
+        </div>
     </div>
-	<!-- Menu -->
-	<transition name="fade">
-		<div id="menu" v-cloak v-if="menuShow" class="text-white rounded-bl-md px-2 py-6 fixed z-20 top-0 right-0 bg-blue-400 w-64 drop-shadow">
+    <!-- Players List -->
+    <transition name="fade">
+        <div id="players" v-if="playersShow" class="menu text-white rounded-br-md px-2 py-6 fixed z-20 top-0 left-0 bg-blue-400 w-64 drop-shadow pt-16">
+            <div v-for="char in characters.filter(ch => !ch.cat || ch.cat=='player')" class="pb-0.5">
+                <svg viewBox="0 0 64 64" width="28" height="28" style="display: inline-block">
+                <circle class="" cx="32" cy="32" r="30" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" stroke-width="4"></circle>
+                <text class="character-initials select-none" x="32" y="34" text-anchor="middle" dominant-baseline="middle" style="font-size: 30px">{{ char.initials }}</text>
+                </svg>
+                {{ char.name }}
+                <span v-if="char.dam > 0">(<i class="fas fa-tint" style="color: #600"></i>{{ char.dam || 0 }})</span>
+            </div>
+            <hr />
+            <div v-for="char in characters.filter(ch => ch.cat=='monster' && ch.dam > 0)" class="pb-0.5">
+                <svg viewBox="0 0 64 64" width="28" height="28" style="display: inline-block">
+                    <circle class="" cx="32" cy="32" r="30" v-bind:fill="char.color.fill" v-bind:stroke="char.color.stroke" stroke-width="4"></circle>
+                    <text class="character-initials select-none" x="32" y="34" text-anchor="middle" dominant-baseline="middle" style="font-size: 30px">{{ char.initials }}</text>
+                </svg>
+                {{ char.name }} (<i class="fas fa-tint" style="color: #600"></i>{{ char.dam || 0 }})
+            </div>
+        </div>
+    </transition>
+    <div id="players-button" v-if="enabled" v-on:click="playersShow=!playersShow" class="btn-blue px-0 w-10 fixed top-1 left-1 z-30">
+        <i class="fas fa-times" v-if="playersShow"></i>
+        <i class="fas fa-users" v-else></i>
+    </div>
+    <!-- Menu -->
+    <transition name="fade">
+		<div id="menu" v-cloak v-if="menuShow" class="menu text-white rounded-bl-md px-2 py-6 fixed z-20 top-0 right-0 bg-blue-400 w-64 drop-shadow">
 			<div class="font-bold text-sm">ID: {{gameId}}</div>
 			<div v-if="connected" class="font-bold text-sm text-green-400">Connected as: {{name}}</div>
 			<div v-else class="text-red-400 font-bold cursor-pointer" v-on:click="connect">Not connected <i class="fa fa-redo"></i></div>
@@ -104,12 +137,18 @@
 			<hr />
 
 			<label for="draw-character-btn" class="draw-label"><input type="checkbox" id="draw-character-btn" v-model="draw.character" v-on:change="drawBtnClick('character')"/>Character</label>
+            <div class="form-group" v-if="draw.character" >
+                <select v-model="drawCharacterCategory" class="block px-3 py-1.5 text-base font-normal bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none text-gray-800">
+                    <option value="player">Player</option>
+                    <option value="monster">Monster / NPC</option>
+                </select>
+            </div>
 			<div class="form-group" v-if="draw.character" >
 				<label for="" class="small block">Name:</label>
 				<input autofocus type="text" v-model="drawCharacterName" class="text-gray-800" placeholder="Legolas" v-on:keyup="characterNameKeyUp"/>
 			</div>
 			<div class="form-group" v-if="draw.character" >
-				<label for="" class="small block">Initials:</label>
+                <label for="" class="small block">Initials:</label>
 				<input type="text" v-model="drawCharacterInitials" class="text-gray-800" placeholder="LE" maxlength="2" />
 				<div class="menu-error" v-if="drawCharacterError">{{ drawCharacterError }}</div>
 			</div>
@@ -148,10 +187,8 @@
 		</div>
 	</transition>
 	<div id="menu-button" v-if="enabled" v-on:click="menuShow=!menuShow" class="btn-blue px-0 w-10 fixed top-1 right-1 z-30">
-		<transition name="fade">
-			<i class="fas fa-times" v-if="menuShow"></i>
-			<i class="fas fa-bars" v-else></i>
-		</transition>
+		<i class="fas fa-times" v-if="menuShow"></i>
+		<i class="fas fa-bars" v-else></i>
 	</div>
 
 	<transition name="fade">
