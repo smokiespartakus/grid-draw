@@ -81,6 +81,7 @@
     <!-- options -->
     <div v-if="activeElement && !moveElement" id="object-options" class="z-30 absolute" v-bind:style="`top:${objectOptions.top}px; left:${objectOptions.left}px;`" v-on:click="optionsBtnMoveClick">
         <div class="btn" title="Move"><i class="fas fa-arrows-alt"></i></div>
+<!--        <div v-if="activeElement.t != 'mask'" class="btn ml-0.5" title="Hide for players"><i class="fas fa-eye-slash "></i></div>-->
     </div>
 	<!-- Menu -->
 	<transition name="fade">
