@@ -310,6 +310,7 @@ const vueApp = Vue.createApp({
 				console.warn('charater not found', index);
 				return;
 			}
+			if (this.role !== 'gm' && char.cat == 'monster') return;
 			this.drawBtnClick('unset');
 			if (this.activeElement == char) {
 				this.activeElement = null;
@@ -652,6 +653,7 @@ const vueApp = Vue.createApp({
 		tooltipMouseOver(event) {
 			// this.tooltip = name;
 			if (this.tooltipTarget) return;
+			if (event.target.classList.contains('monster') && this.role != 'gm') return;
 			const rect = event.target.getBoundingClientRect();
 			this.tooltipTarget = event.target;
 			this.tooltipLeft = rect.left + rect.width/2;

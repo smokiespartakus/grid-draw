@@ -123,13 +123,18 @@ html, body {
 .role-gm .grid-text:hover {
     fill: #00f;
 }
-.character {
+.monster, .character {
     stroke-width: 4px;
+}
+.role-gm .monster,
+.character {
     cursor: pointer;
 }
+.role-gm .monster:hover,
 .character:hover {
     stroke: #00f;
 }
+.role-gm .monster.active,
 .character.active {
     stroke: #f00;
     fill: #fff;
@@ -138,6 +143,7 @@ html, body {
     pointer-events: none;
     font-weight: bold;
 }
+
 .fade-enter-active {
     transition: opacity .3s;
 }
