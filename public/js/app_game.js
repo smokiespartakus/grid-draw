@@ -848,6 +848,24 @@ const vueApp = Vue.createApp({
 			// console.log(event.key, event.code, event.keyCode, event);
 		});
 	},
+	computed: {
+		getPlayers() {
+			const plrs = [];
+			for (let i=0; i<this.characters.length; i++) {
+				const char = this.characters[i];
+				if (!char.cat || char.cat == 'player') plrs.push({char:char, key: i});
+			}
+			return plrs;
+		},
+		getMonsters() {
+			const mnstrs = [];
+			for (let i=0; i<this.characters.length; i++) {
+				const char = this.characters[i];
+				if (char.cat == 'monster') mnstrs.push({char: char, key: i});
+			}
+			return mnstrs;
+		},
+	},
 	watch: {
 		style (val) {
 			localStorage.setItem('grid-style', val);
