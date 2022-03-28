@@ -141,6 +141,7 @@
             <hr />
             <div v-if="role=='gm'">
 
+                <div class="btn-orange" v-on:click="historyPop" style="float:right">Undo</div>
     			<div>Draw:</div>
                 <div><label for="draw-lines-btn" class="draw-label"><input type="checkbox" id="draw-lines-btn" v-model="draw.lines" v-on:change="drawBtnClick('lines')"/>Lines</label></div>
                 <div><label for="draw-rects-btn"><input type="checkbox" id="draw-rects-btn" v-model="draw.rects" v-on:change="drawBtnClick('rects')"/>Rectangles</label></div>
@@ -178,7 +179,6 @@
 			<hr />
             <label for="draw-masks-btn" class="draw-label"><input type="checkbox" id="draw-masks-btn" v-model="draw.masks" v-on:change="drawBtnClick('masks')"/>Masks</label>
             <label for="show-masks-btn" class="draw-label"><input type="checkbox" id="show-masks-btn" v-model="masksShow"/>Masks Visible</label>
-
             <hr />
 <!--            <div class="form-group"><div class="btn-orange" v-on:click="clearElements">Clear Elements</div></div>-->
 <!--            <div class="form-group"><div class="btn-red" v-on:click="clearCharacters">Clear Characters</div></div>-->
